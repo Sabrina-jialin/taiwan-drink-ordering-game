@@ -1,0 +1,4040 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>台灣飲料點餐練習｜Drink Ordering Game</title>
+  <style>
+    :root{
+      --red:#c82d35;
+      --red2:#ef5961;
+      --orange:#ff9a2e;
+      --orange2:#ffcf6d;
+      --green:#6fae54;
+      --teal:#4fa3a5;
+      --blue:#3487dc;
+      --purple:#8a54c6;
+      --cream:#fff8ea;
+      --paper:#fffdf6;
+      --ink:#3f332d;
+      --muted:#7b7068;
+      --line:#eadbc8;
+      --shadow: 0 16px 40px rgba(83,45,25,.12);
+      --round: 22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, Segoe UI, sans-serif;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,207,109,.38), transparent 22rem),
+        radial-gradient(circle at 90% 15%, rgba(238,89,97,.18), transparent 28rem),
+        radial-gradient(circle at 85% 90%, rgba(111,174,84,.17), transparent 24rem),
+        linear-gradient(135deg, #fffdf4 0%, #fff3dd 100%);
+      overflow-x:hidden;
+    }
+
+    .page{
+      width:min(1440px, 100%);
+      margin:auto;
+      padding:24px;
+    }
+
+    header{
+      display:grid;
+      grid-template-columns: 220px 1fr 330px;
+      gap:18px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+    }
+    .logo-mark{
+      width:58px;height:48px;border-radius:14px;
+      background:linear-gradient(135deg,var(--red),#f36b5f);
+      display:grid;place-items:center;color:white;font-size:28px;font-weight:900;
+      box-shadow: 0 10px 20px rgba(200,45,53,.18);
+    }
+    .brand strong{font-size:26px;color:var(--red);letter-spacing:1px;}
+    .brand span{font-size:13px;color:var(--muted);display:block;margin-top:2px}
+
+    .title{
+      text-align:center;
+      position:relative;
+    }
+    .title h1{
+      margin:0;
+      font-size:clamp(28px, 4vw, 52px);
+      color:#b91f2b;
+      letter-spacing:.04em;
+      text-shadow: 0 2px 0 rgba(255,255,255,.7);
+      line-height:1.05;
+    }
+    .title p{
+      margin:10px 0 0;
+      color:#7b6d56;
+      font-weight:700;
+      letter-spacing:.22em;
+      font-size:18px;
+    }
+    .leaf{
+      display:inline-block;
+      color:var(--green);
+      transform:rotate(-15deg);
+      margin:0 8px;
+      font-size:28px;
+    }
+
+    .status{
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap:12px;
+    }
+    .status .card{
+      background:rgba(255,253,246,.78);
+      border:2px solid #eadbc8;
+      border-radius:18px;
+      padding:14px 16px;
+      box-shadow:0 12px 25px rgba(61,35,15,.08);
+    }
+    .progress-title{
+      font-weight:800;
+      text-align:center;
+      font-size:18px;
+      margin-bottom:10px;
+    }
+    .progress-title b{color:var(--red);font-size:28px}
+    .bar{
+      height:14px;
+      border:2px solid #e2c6a5;
+      border-radius:999px;
+      padding:2px;
+      background:white;
+    }
+    .bar span{
+      display:block;
+      height:100%;
+      width:40%;
+      background:linear-gradient(90deg,var(--red),var(--orange));
+      border-radius:999px;
+      transition:.3s;
+    }
+    .score{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      font-size:28px;
+    }
+    .score .empty{filter:grayscale(1);opacity:.4}
+    .score b{font-size:20px;color:var(--red);margin-left:4px}
+
+
+
+    .level-nav{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:12px;
+      margin:0 0 18px;
+    }
+    .level-btn{
+      border:2px solid #eadbc8;
+      border-radius:18px;
+      background:rgba(255,253,246,.92);
+      color:#6f5d4d;
+      min-height:74px;
+      padding:10px 8px;
+      font-weight:1000;
+      font-size:18px;
+      cursor:pointer;
+      box-shadow:0 10px 22px rgba(71,39,11,.07);
+      transition:.18s;
+    }
+    .level-btn small{
+      display:block;
+      margin-top:4px;
+      font-size:13px;
+      font-weight:900;
+      color:#8b7a6b;
+    }
+    .level-btn:hover{
+      transform:translateY(-2px);
+      border-color:#f1b36b;
+      background:#fff8e7;
+    }
+    .level-btn.active{
+      color:white;
+      border-color:#b91f2b;
+      background:linear-gradient(135deg,var(--red),var(--orange));
+      box-shadow:0 12px 24px rgba(200,45,53,.18);
+    }
+    .level-btn.active small{color:#fff8e8}
+
+    main{
+      display:grid;
+      grid-template-columns: 360px 1fr 420px;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .panel{
+      border-radius:var(--round);
+      background:rgba(255,253,246,.88);
+      border:2px solid rgba(200,45,53,.20);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{
+      background:linear-gradient(135deg,var(--red),var(--red2));
+      color:white;
+      padding:14px 18px;
+      font-size:26px;
+      font-weight:900;
+      display:flex;align-items:center;justify-content:space-between;
+      letter-spacing:.05em;
+    }
+    .menu-body{padding:14px 16px 18px}
+    .menu-top{
+      display:grid;
+      grid-template-columns:1fr 62px 62px;
+      color:#5a4f48;
+      font-weight:900;
+      padding:0 8px 6px;
+      border-bottom:2px solid #ecdac4;
+      margin-bottom:4px;
+    }
+    .category{
+      margin-top:12px;
+      padding:0 8px;
+    }
+    .cat-title{
+      font-size:18px;font-weight:900;margin:7px 0 8px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .cat-title.orange{color:#f08318}
+    .cat-title.cheese{color:#e2a200}
+    .cat-title.green{color:#4f9a43}
+    .cat-title.teal{color:#3b9ca4}
+    .cat-title.pink{color:#de476a}
+    .item{
+      display:grid;
+      grid-template-columns:56px 1fr 62px 62px;
+      gap:4px;
+      align-items:center;
+      min-height:33px;
+      padding:4px 0;
+      border-bottom:1px dashed #ead7bf;
+      font-weight:700;
+    }
+    .item button{
+      all:unset;
+      cursor:pointer;
+      border-radius:12px;
+      padding:4px 6px;
+    }
+    .item button:hover{
+      background:#fff1d8;
+      color:var(--red);
+    }
+    .item .price{text-align:center;color:#433a35}
+
+    .dialogue{
+      border:2px solid rgba(52,135,220,.24);
+      background:linear-gradient(180deg, rgba(235,249,255,.9), rgba(255,253,246,.96));
+    }
+    .dialogue .panel-head{
+      background:linear-gradient(135deg,#e8f7ff,#ffffff);
+      color:#1e5f99;
+      border-bottom:1px solid #cfe7f4;
+    }
+    .dialogue-body{padding:16px 20px 18px}
+    .hint-small{font-size:15px;color:#417cae;margin-left:8px;font-weight:800}
+    .row{
+      display:grid;
+      grid-template-columns:58px 1fr;
+      gap:12px;
+      margin:10px 0;
+      align-items:start;
+    }
+    .row.student{
+      grid-template-columns:1fr 58px;
+    }
+    .avatar{
+      width:58px;height:58px;border-radius:50%;
+      background:#fff;
+      border:3px solid #f0d3ba;
+      display:grid;place-items:center;
+      font-size:34px;
+      box-shadow:0 7px 14px rgba(69,36,10,.10);
+      position:relative;
+    }
+    .avatar::after{
+      content:attr(data-label);
+      position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+      font-size:13px;font-weight:900;color:var(--red);white-space:nowrap;
+    }
+    .student .avatar::after{color:var(--green)}
+    .bubble{
+      background:white;
+      border:2px solid #eddac5;
+      border-radius:18px;
+      padding:13px 56px 13px 18px;
+      position:relative;
+      font-size:19px;
+      font-weight:700;
+      min-height:56px;
+      display:flex;align-items:center;
+      box-shadow:0 8px 18px rgba(60,32,12,.06);
+    }
+    .bubble.green{
+      background:#f0fbec;
+      border-color:#a4c995;
+    }
+    .speak{
+      position:absolute;
+      right:10px;top:50%;
+      transform:translateY(-50%);
+      width:38px;height:38px;border-radius:50%;
+      border:2px solid currentColor;
+      background:white;
+      color:var(--red);
+      display:grid;place-items:center;
+      font-size:18px;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .green .speak{color:var(--green)}
+    .speak:hover{transform:translateY(-50%) scale(1.08)}
+    .choice-group{
+      margin:10px 0 12px 70px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(90px, 1fr));
+      gap:10px;
+    }
+    .choice-group.ice{grid-template-columns:repeat(5, minmax(84px, 1fr))}
+    .choice{
+      border:2px solid #e8b19d;
+      border-radius:13px;
+      background:white;
+      padding:10px 8px;
+      text-align:center;
+      font-size:17px;
+      font-weight:900;
+      color:#675851;
+      cursor:pointer;
+      transition:.18s;
+      box-shadow:0 6px 14px rgba(68,37,10,.05);
+    }
+    .choice:hover{transform:translateY(-2px);background:#fff6ed}
+    .choice.selected.sugar{
+      background:linear-gradient(135deg,#ffb94f,#ff8f2b);
+      color:white;border-color:#e87b10;
+    }
+    .choice.selected.ice{
+      background:linear-gradient(135deg,#69b7ff,#2f86d9);
+      color:white;border-color:#1973c7;
+    }
+    .choice.selected.topping{
+      background:linear-gradient(135deg,#a362d9,#7431b7);
+      color:white;border-color:#6d2da9;
+    }
+    .choice.selected.size{
+      background:linear-gradient(135deg,#56c271,#2f9652);
+      color:white;border-color:#258248;
+    }
+    .choice.selected.bag{
+      background:linear-gradient(135deg,#ffca59,#f08a24);
+      color:white;border-color:#d67714;
+    }
+    .choice.selected.member{
+      background:linear-gradient(135deg,#7e96ff,#4f64d9);
+      color:white;border-color:#4656c8;
+    }
+    .choice-group.current-step{
+      border:4px solid rgba(235,111,76,.55);
+      border-radius:18px;
+      padding:10px;
+      background:rgba(255,241,215,.86);
+      animation:pulseGuide 1.2s infinite;
+      scroll-margin-top:28px;
+    }
+    .choice-group.current-step .choice{
+      border-color:#ef8b4c;
+    }
+    .choice-group.current-step::before{
+      content:"👉 請選這裡";
+      display:block;
+      grid-column:1/-1;
+      color:#c44827;
+      font-weight:1000;
+      margin:0 0 2px;
+      font-size:15px;
+    }
+
+    .recorder{
+      margin:20px auto 0;
+      width:min(520px,100%);
+      background:#fff7e8;
+      border:2px solid #f2d8b1;
+      border-radius:999px;
+      padding:10px 16px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:12px;
+      align-items:center;
+      box-shadow:0 12px 24px rgba(103,59,13,.08);
+    }
+    .wave{
+      height:36px;
+      opacity:.55;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 14px, #e8a84e 14px 18px, transparent 18px 28px);
+      border-radius:99px;
+      mask: radial-gradient(ellipse at center, black, transparent 70%);
+    }
+    .record-btn{
+      display:flex;align-items:center;gap:12px;
+      border:0;border-radius:999px;
+      background:linear-gradient(135deg,#ff606a,var(--red));
+      color:white;font-size:24px;font-weight:900;
+      padding:12px 28px;
+      cursor:pointer;
+      box-shadow:0 12px 24px rgba(200,45,53,.25);
+    }
+    .record-btn.recording{
+      animation:pulse 1s infinite;
+      background:linear-gradient(135deg,#e63737,#861717);
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.04)}
+    }
+    .record-msg{
+      text-align:center;color:#7b6d56;font-weight:800;font-size:14px;margin-top:8px;min-height:20px
+    }
+
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .drink-card .content{
+      padding:24px 26px 18px;
+      display:grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap:18px;
+      align-items:center;
+    }
+    .cup{
+      height:235px;
+      display:grid;place-items:center;
+      position:relative;
+    }
+    .cup svg{max-width:160px;width:100%;filter:drop-shadow(0 14px 18px rgba(96,46,16,.18))}
+    .summary-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+    .summary-list li{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px dashed #e6d2ba;
+      font-size:19px;
+      font-weight:800;
+    }
+    .summary-list span.icon{font-size:25px;width:28px;text-align:center}
+    .confirm{
+      display:block;
+      width:80%;
+      margin: 0 auto 22px;
+      border:0;border-radius:18px;
+      background:linear-gradient(135deg,#f75961,var(--red));
+      color:white;
+      padding:15px 20px;
+      font-size:24px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 12px 24px rgba(200,45,53,.22);
+    }
+    .confirm:active{transform:translateY(1px)}
+
+    .task{
+      border-color:rgba(111,174,84,.35);
+      background:rgba(251,255,246,.92);
+    }
+    .task .panel-head{
+      background:linear-gradient(135deg,#d8efc8,#fbfff6);
+      color:#5a9d3f;
+      border-bottom:1px solid #cbeab5;
+    }
+    .task-body{
+      padding:20px 22px 18px;
+      display:grid;
+      grid-template-columns:1fr 120px;
+      gap:16px;
+      align-items:end;
+      min-height:188px;
+    }
+    .task-body p{
+      font-size:19px;
+      font-weight:800;
+      line-height:1.8;
+      margin:0;
+    }
+    .target-sentence{
+      color:var(--red);
+      font-size:24px;
+      font-weight:1000;
+      line-height:1.7;
+    }
+    .mascot{
+      width:118px;height:130px;
+      display:grid;place-items:center;
+      font-size:90px;
+      filter:drop-shadow(0 8px 10px rgba(77,48,19,.13));
+    }
+
+    .phrases{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:250px repeat(4, 1fr);
+      gap:14px;
+      align-items:center;
+    }
+    .phrase-title,.phrase-card{
+      background:rgba(255,253,246,.86);
+      border:2px solid #ecd6b6;
+      border-radius:18px;
+      min-height:76px;
+      display:flex;align-items:center;
+      padding:14px;
+      box-shadow:0 10px 22px rgba(71,39,11,.08);
+    }
+    .phrase-title{
+      color:#d46a00;
+      font-size:24px;
+      font-weight:1000;
+      gap:12px;
+    }
+    .phrase-card{
+      gap:12px;
+      font-size:19px;
+      font-weight:900;
+      justify-content:space-between;
+    }
+    .badge{
+      width:36px;height:36px;border-radius:50%;
+      display:grid;place-items:center;
+      color:white;font-weight:1000;
+      flex:none;
+    }
+    .b1{background:#fb8b24}.b2{background:#5eae55}.b3{background:#2f86d9}.b4{background:#7d4cb8}
+    .mini-speak{
+      border:2px solid currentColor;
+      border-radius:50%;
+      width:34px;height:34px;
+      display:grid;place-items:center;
+      background:white;cursor:pointer;flex:none;
+    }
+    .p1{border-color:#f0bf87;color:#ed7d12}
+    .p2{border-color:#baddb2;color:#4a9e42}
+    .p3{border-color:#a8d0f5;color:#2f86d9}
+    .p4{border-color:#d4b8e8;color:#7d4cb8}
+
+    .section-task{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin:14px 18px 0;
+      padding:14px 16px;
+      border:3px solid #ffb23f;
+      border-radius:18px;
+      background:linear-gradient(135deg,#fff2b8,#fff9e8);
+      box-shadow:0 12px 24px rgba(238,151,40,.18);
+    }
+    .section-task::before{
+      content:"🎯";
+      font-size:26px;
+      line-height:1;
+      filter:drop-shadow(0 4px 5px rgba(194,98,0,.14));
+    }
+    .section-task.compact{margin:8px 0 12px}
+    .section-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#fff2db;
+      color:#b86500;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:15px;
+      font-weight:1000;
+      border:2px solid #f4d4a0;
+      flex:none;
+    }
+    .section-target{
+      color:#c44827;
+      font-size:18px;
+      font-weight:1000;
+      line-height:1.65;
+    }
+    .section-task.active-level-task{
+      border-color:#ef6f38;
+      background:linear-gradient(135deg,#ffe070,#fff7d8);
+      box-shadow:0 14px 28px rgba(239,111,56,.22);
+    }
+    @keyframes pulseGuide{
+      0%{box-shadow:0 0 0 0 rgba(239,111,56,.42),0 14px 28px rgba(239,111,56,.18)}
+      70%{box-shadow:0 0 0 12px rgba(239,111,56,0),0 14px 28px rgba(239,111,56,.18)}
+      100%{box-shadow:0 0 0 0 rgba(239,111,56,0),0 14px 28px rgba(239,111,56,.18)}
+    }
+    .focus-target{
+      box-shadow:0 0 0 4px rgba(235,111,76,.26),0 14px 28px rgba(71,39,11,.12)!important;
+      outline:4px solid rgba(235,111,76,.32);
+      outline-offset:4px;
+      transition:.25s;
+      scroll-margin-top:18px;
+      animation:pulseGuide 1.2s infinite;
+      border-radius:18px;
+    }
+    #confirmBtn.focus-target{
+      border-radius:999px;
+    }
+
+    .prep-area{
+      margin:18px 0 14px;
+      display:grid;
+      gap:16px;
+    }
+    .prep-bottom{
+      display:grid;
+      grid-template-columns:minmax(330px,.95fr) minmax(420px,1.25fr);
+      gap:16px;
+      align-items:start;
+    }
+    .top-phrases{
+      margin-top:0;
+      grid-template-columns:1fr;
+    }
+    .top-phrases .phrase-title{
+      justify-content:flex-start;
+    }
+    .top-phrases .phrase-card{
+      min-height:72px;
+    }
+    .guide-panel{
+      border-color:rgba(109,160,224,.3);
+      background:rgba(247,251,255,.94);
+    }
+    .guide-panel .panel-head{
+      background:linear-gradient(135deg,#dbeeff,#fbfeff);
+      color:#3f78b8;
+      border-bottom:1px solid #cfe3f7;
+    }
+    .guide-body{
+      padding:18px 20px 20px;
+      display:grid;
+      gap:14px;
+    }
+    .scale-card{
+      background:white;
+      border:2px solid #d7e5f5;
+      border-radius:18px;
+      padding:14px 16px;
+      box-shadow:0 8px 18px rgba(58,80,115,.08);
+    }
+    .scale-card h3{
+      margin:0 0 10px;
+      color:#315f98;
+      font-size:18px;
+      font-weight:1000;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .scale-line{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:0 0 10px;
+    }
+    .scale-chip{
+      min-width:84px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:2px solid #d4e6f7;
+      background:#f8fcff;
+      color:#3e6f9c;
+      font-size:15px;
+      font-weight:900;
+      text-align:center;
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      font-family:inherit;
+      appearance:none;
+    }
+    button.scale-chip{
+      cursor:pointer;
+      border-color:#f0b04d;
+      background:linear-gradient(180deg,#fffdf8,#fff0d6);
+      box-shadow:0 6px 14px rgba(71,39,11,.08);
+      transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+    }
+    button.scale-chip:hover{
+      transform:translateY(-2px);
+      border-color:#eb6f4c;
+      background:linear-gradient(180deg,#fff7e5,#ffe1b8);
+      box-shadow:0 10px 18px rgba(71,39,11,.14);
+    }
+    button.scale-chip:active{
+      transform:translateY(0);
+      box-shadow:0 4px 10px rgba(71,39,11,.10);
+    }
+    button.scale-chip:focus-visible{
+      outline:4px solid rgba(235,111,76,.35);
+      outline-offset:3px;
+    }
+    .audio-mark{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      margin-top:4px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#eb6f4c;
+      color:white;
+      font-size:.82em;
+      font-weight:1000;
+      line-height:1.2;
+      vertical-align:middle;
+    }
+    .scale-chip::before{
+      content:attr(data-icon);
+      display:block;
+      font-size:26px;
+      line-height:1.1;
+    }
+    .scale-chip::after{
+      content:attr(data-pinyin);
+      display:block;
+      font-size:.72em;
+      color:#7b91a8;
+      font-weight:700;
+    }
+    .hide-pinyin .scale-chip::after{display:none}
+    .scale-tip{display:none}
+    .size-tip{
+      display:block;
+      margin:8px 0 0;
+      color:#6f7e8f;
+      font-size:14px;
+      font-weight:800;
+      line-height:1.7;
+    }
+    .size-chip strong{
+      display:block;
+      font-size:16px;
+      line-height:1.2;
+    }
+    .size-chip small{
+      display:block;
+      font-size:13px;
+      color:#56708b;
+      font-weight:900;
+      margin-top:2px;
+    }
+
+
+    .toolbar{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:0 0 14px;
+    }
+    .pinyin-toggle,
+    .english-toggle{
+      border:2px solid #ead6ba;
+      background:rgba(255,253,246,.94);
+      color:#6e5b4b;
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:15px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(71,39,11,.08);
+    }
+    .pinyin-toggle:hover,
+    .english-toggle:hover{background:#fff8e7}
+    .zhpy{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px}
+    .zhpy::after{
+      content:attr(data-pinyin);
+      order:1;
+      display:block;
+      font-size:.68em;
+      line-height:1.3;
+      color:#8c7767;
+      font-weight:800;
+      letter-spacing:.01em;
+      white-space:normal;
+    }
+    .zhpy::before{
+      content:attr(data-en);
+      order:2;
+      display:block;
+      font-size:.68em;
+      line-height:1.3;
+      color:#7a8a97;
+      font-weight:700;
+      letter-spacing:.01em;
+      white-space:normal;
+    }
+    .hide-pinyin .zhpy::after{display:none}
+    .hide-en .zhpy::before{display:none}
+    .brand .zhpy::after,.panel-head .zhpy::after,.phrase-title.zhpy::after{font-size:.58em}
+    .brand .zhpy::before,.panel-head .zhpy::before,.phrase-title.zhpy::before{font-size:.58em}
+    .menu-top .zhpy::after,.level-btn .zhpy::after,.status .zhpy::after,.note.zhpy::after{font-size:.72em}
+    .menu-top .zhpy::before,.level-btn .zhpy::before,.status .zhpy::before,.note.zhpy::before{font-size:.72em}
+    .item button.zhpy{display:flex;width:100%;text-align:left}
+    .bubble .zhpy{display:block;max-width:100%;padding-right:0}
+    .choice .zhpy{display:block}
+    .summary-list .zhpy{display:block}
+    .task .zhpy{display:block}
+    .record-btn .zhpy{display:flex;align-items:flex-start;gap:4px}
+    .record-btn .zhpy::after,.record-btn .zhpy::before{font-size:.58em;text-align:left}
+    .mini-text.zhpy::after,.mini-text.zhpy::before{font-size:.72em}
+    .choice-note{
+      margin:6px 0 6px 70px;
+      font-size:15px;
+      font-weight:900;
+      color:#7b6d56;
+    }
+    .student-choice-row{
+      grid-template-columns:1fr 58px;
+      margin:14px 0 18px;
+    }
+    .student-choice-card{
+      background:#f0fbec;
+      border:2px solid #a4c995;
+      border-radius:20px;
+      padding:14px 16px 16px;
+      box-shadow:0 8px 18px rgba(60,32,12,.06);
+    }
+    .student-choice-card .choice-note{
+      margin:8px 0 8px;
+      color:#4e8e3f;
+    }
+    .student-choice-card .choice-group,
+    .student-choice-card .choice-group.ice{
+      margin-left:0;
+    }
+    .choice-group.small-options{
+      grid-template-columns:repeat(4, minmax(100px, 1fr));
+      margin-left:70px;
+    }
+    .focus-target{
+      box-shadow:0 0 0 4px rgba(235,111,76,.22),0 14px 28px rgba(71,39,11,.12)!important;
+      outline:3px solid rgba(235,111,76,.28);
+      outline-offset:4px;
+      transition:.25s;
+      scroll-margin-top:18px;
+    }
+    .level-btn.done{
+      border-color:#f0b429;
+      background:linear-gradient(180deg,#fff7db,#fff2c0);
+    }
+    .level-btn.done small::after{
+      content:" ✓";
+      color:#c67900;
+      font-weight:900;
+    }
+    .hidden{display:none!important}
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(52,48,44,.52);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:40;
+      padding:20px;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal-card{
+      width:min(460px,92vw);
+      background:#fffaf1;
+      border:4px solid #f6dfb7;
+      border-radius:28px;
+      box-shadow:0 22px 56px rgba(0,0,0,.22);
+      padding:30px 26px;
+      text-align:center;
+    }
+    .modal-stars{font-size:30px;margin-bottom:10px}
+    .modal-card h2{margin:0 0 8px;font-size:32px;color:#6c4a2f}
+    .modal-card p{margin:0 0 22px;color:#7c6c5e;line-height:1.8;font-weight:700}
+    .modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .modal-actions button{
+      border:none;
+      border-radius:999px;
+      padding:12px 20px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(71,39,11,.12);
+    }
+    .modal-close{background:#efe4d3;color:#6e5b4b}
+    .modal-restart{background:#eb6f4c;color:white}
+
+    .page{
+      padding-left:270px;
+      padding-right:24px;
+    }
+    .progress-sidebar{
+      position:fixed;
+      left:18px;
+      top:118px;
+      width:230px;
+      z-index:25;
+      grid-template-columns:1fr;
+    }
+    .progress-label{
+      font-size:20px;
+      font-weight:1000;
+      color:#d45d46;
+      margin-bottom:8px;
+    }
+    .progress-steps{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+    .progress-step{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 9px;
+      border-radius:14px;
+      background:#fff8eb;
+      border:2px solid #ecd6b6;
+      color:#7b6656;
+      font-weight:900;
+      width:100%;
+      cursor:pointer;
+      text-align:left;
+      font-family:inherit;
+      box-shadow:0 8px 16px rgba(71,39,11,.06);
+    }
+    .progress-sidebar{
+      left:18px !important;
+      right:auto !important;
+    }
+    .progress-step.active{
+      background:#fff0d6;
+      border-color:#ed9c59;
+      color:#bd5a10;
+      box-shadow:0 8px 16px rgba(237,156,89,.16);
+    }
+    .progress-step.done{
+      background:#eff9ec;
+      border-color:#9bc98e;
+      color:#3d8a39;
+    }
+    .step-dot{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:#ead6ba;
+      color:#6e5b4b;
+      font-weight:1000;
+      flex:none;
+    }
+    .progress-step.active .step-dot{
+      background:#eb6f4c;
+      color:white;
+    }
+    .progress-step.done .step-dot{
+      background:#5eae55;
+      color:white;
+    }
+
+    /* Bottom toast now shows progress, so the fixed progress column is hidden. */
+    .progress-sidebar{
+      display:none !important;
+    }
+    .page{
+      padding-left:24px !important;
+      padding-right:24px !important;
+    }
+
+
+    /* Layout polish: softer spacing and more balanced cards */
+    header{
+      grid-template-columns:minmax(220px,260px) 1fr !important;
+      gap:22px;
+      align-items:center;
+    }
+    .title h1{
+      line-height:1.18;
+    }
+    main{
+      grid-template-columns:minmax(330px,.88fr) minmax(520px,1.34fr) minmax(360px,.92fr);
+      gap:22px;
+      align-items:start;
+    }
+    .panel{
+      background:rgba(255,253,246,.95);
+    }
+    .panel-head{
+      font-size:24px;
+      padding:15px 20px;
+    }
+    .prep-area{
+      gap:18px;
+    }
+    .prep-bottom{
+      grid-template-columns:minmax(360px,1fr) minmax(420px,1fr);
+      gap:18px;
+    }
+    .guide-body{
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .top-phrases .phrase-card{
+      min-height:68px;
+    }
+    .menu-body{
+      padding:16px 18px 20px;
+    }
+    .dialogue-body{
+      padding:18px 22px 20px;
+    }
+    .side{
+      gap:20px;
+    }
+    .record-playback{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:10px auto 0;
+    }
+    .play-recording-btn{
+      border:2px solid #e9c9a0;
+      background:linear-gradient(135deg,#fffdf7,#fff0d5);
+      color:#8a5631;
+      border-radius:999px;
+      padding:10px 16px;
+      font-weight:1000;
+      cursor:pointer;
+      box-shadow:0 8px 16px rgba(71,39,11,.08);
+    }
+    .play-recording-btn:hover{
+      transform:translateY(-1px);
+      border-color:#eb6f4c;
+      color:#c94a2d;
+    }
+    .record-audio{
+      width:min(360px,92%);
+      height:38px;
+    }
+    @media (max-width:1180px){
+      header{grid-template-columns:1fr !important}
+      main{grid-template-columns:1fr}
+      .prep-bottom{grid-template-columns:1fr}
+      .guide-body{grid-template-columns:1fr}
+    }
+
+    .fruit{
+      position:fixed;
+      z-index:-1;
+      font-size:120px;
+      opacity:.9;
+      pointer-events:none;
+      filter:drop-shadow(0 14px 18px rgba(75,36,12,.15));
+    }
+    .fruit.left{left:-16px;bottom:18px}
+    .fruit.right{right:20px;bottom:8px}
+    .fruit.top{right:80px;top:105px;font-size:70px;opacity:.45}
+
+    .toast{
+      position:fixed;
+      left:50%;bottom:28px;
+      transform:translateX(-50%) translateY(120px);
+      background:#34302c;color:white;
+      padding:14px 22px;border-radius:999px;
+      font-weight:900;box-shadow:0 14px 30px rgba(0,0,0,.22);
+      transition:.25s;
+      z-index:20;
+      max-width:min(680px,90vw);
+      text-align:center;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    .note{
+      text-align:center;
+      color:#8b7a6b;
+      font-size:13px;
+      margin:14px auto 0;
+      line-height:1.6;
+      max-width:980px;
+    }
+    .note + .note{
+      margin-top:6px;
+      color:#7d6e60;
+      font-weight:700;
+    }
+
+
+    /* 統一色調：溫暖茶色 × 柔和綠，降低色彩雜亂感 */
+    :root{
+      --red:#9f5d3f;
+      --red2:#c7835a;
+      --orange:#c9863f;
+      --orange2:#e8c987;
+      --green:#718f69;
+      --teal:#6f908c;
+      --blue:#6f8fa8;
+      --purple:#8d7865;
+      --cream:#fff8ea;
+      --paper:#fffdf7;
+      --ink:#3d332b;
+      --muted:#756b61;
+      --line:#e7d9c5;
+      --shadow:0 16px 36px rgba(72,48,30,.12);
+    }
+    body{
+      background:
+        radial-gradient(circle at 12% 18%, rgba(232,201,135,.28), transparent 24rem),
+        radial-gradient(circle at 92% 20%, rgba(113,143,105,.16), transparent 28rem),
+        radial-gradient(circle at 86% 92%, rgba(159,93,63,.10), transparent 24rem),
+        linear-gradient(135deg,#fffdf7 0%,#f8eddc 100%);
+    }
+    .logo-mark,
+    .panel-head,
+    .modal-restart{
+      background:linear-gradient(135deg,#8f5639,#c7835a)!important;
+      color:#fffdf7!important;
+    }
+    .brand,
+    .card,
+    .panel,
+    .phrase-card,
+    .scale-card,
+    .student-choice-card,
+    .modal-card{
+      border-color:#e7d9c5!important;
+      background:rgba(255,253,247,.96)!important;
+    }
+    .dialogue{
+      border-color:rgba(113,143,105,.28)!important;
+      background:linear-gradient(180deg,rgba(247,251,244,.96),rgba(255,253,247,.98))!important;
+    }
+    .dialogue .panel-head,
+    .guide-panel .panel-head{
+      background:linear-gradient(135deg,#e8efe2,#fffdf7)!important;
+      color:#4e6f52!important;
+      border-bottom:1px solid #d8e4cf!important;
+    }
+    .cat-title.orange,
+    .cat-title.cheese,
+    .cat-title.green,
+    .cat-title.teal,
+    .cat-title.pink{
+      color:#6f7f52!important;
+    }
+    .item{
+      border-bottom-color:#e7d9c5!important;
+    }
+    .item button:hover{
+      background:#f3eadb!important;
+      color:#8f5639!important;
+    }
+    .price{
+      color:#6c5847!important;
+    }
+    .section-task,
+    .section-task.active-level-task{
+      border-color:#d49a56!important;
+      background:linear-gradient(135deg,#fff3cf,#fffaf0)!important;
+      box-shadow:0 12px 24px rgba(137,88,46,.14)!important;
+    }
+    .section-target{
+      color:#8f5639!important;
+    }
+    .bubble,
+    .green{
+      border-color:#d8e4cf!important;
+      background:#f7fbf2!important;
+      color:#40563f!important;
+    }
+    .choice{
+      border-color:#d9c5ab!important;
+      background:#fffdf7!important;
+      color:#51463d!important;
+    }
+    .choice:hover{
+      background:#f5eddf!important;
+    }
+    .choice.selected.sugar,
+    .choice.selected.ice,
+    .choice.selected.topping,
+    .choice.selected.size,
+    .choice.selected.bag,
+    .choice.selected.member{
+      background:linear-gradient(135deg,#789568,#5f7d56)!important;
+      color:#fffdf7!important;
+      border-color:#4f6c49!important;
+      box-shadow:0 8px 16px rgba(79,108,73,.18)!important;
+    }
+    .choice-group.current-step{
+      border-color:rgba(143,86,57,.55)!important;
+      background:rgba(255,246,228,.92)!important;
+    }
+    .choice-group.current-step::before{
+      color:#8f5639!important;
+    }
+    .confirm,
+    .record-btn,
+    .audio-mark{
+      background:linear-gradient(135deg,#8f5639,#c7835a)!important;
+      color:white!important;
+    }
+    .mini-speak,
+    .speak,
+    .play-recording-btn{
+      color:#8f5639!important;
+      border-color:#dec9ac!important;
+    }
+    button.scale-chip{
+      border-color:#d9c5ab!important;
+      background:linear-gradient(180deg,#fffdf7,#f4eadb)!important;
+      color:#4f6c49!important;
+    }
+    button.scale-chip:hover{
+      border-color:#8f5639!important;
+      background:linear-gradient(180deg,#fff8ec,#eadcc7)!important;
+    }
+    .toast{
+      background:rgba(61,51,43,.94)!important;
+    }
+
+
+
+    .summary-list li.confirm-highlight{
+      background:linear-gradient(135deg,#fff0bf,#ffe08a)!important;
+      border:3px solid #f07d6d!important;
+      border-radius:18px;
+      transform:scale(1.06);
+      color:#8f5639!important;
+      box-shadow:0 0 0 7px rgba(255,211,110,.28), 0 14px 24px rgba(177,104,58,.16)!important;
+      transition:.25s;
+    }
+    .summary-list li.confirm-highlight span:last-child{
+      font-size:1.18em;
+      font-weight:1000;
+    }
+    .section-task.confirm-highlight{
+      transform:scale(1.02);
+      transition:.25s;
+    }
+
+    /* 插畫風 × 台灣飲料店風格：活潑但統一 */
+    :root{
+      --red:#f07d6d;
+      --red2:#ffab8c;
+      --orange:#ff9e52;
+      --orange2:#ffd36e;
+      --green:#67b77a;
+      --teal:#58b7b0;
+      --blue:#72a9e8;
+      --purple:#a287d8;
+      --cream:#fff8ef;
+      --paper:#fffdf8;
+      --ink:#4a3a34;
+      --muted:#776762;
+      --line:#f2d2b4;
+      --shadow:0 10px 0 rgba(219,141,95,.18), 0 18px 36px rgba(108,73,44,.14);
+      --outline:3px solid rgba(93,66,51,.14);
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,211,110,.42), transparent 16rem),
+        radial-gradient(circle at 88% 18%, rgba(88,183,176,.24), transparent 18rem),
+        radial-gradient(circle at 84% 86%, rgba(240,125,109,.16), transparent 16rem),
+        linear-gradient(180deg,#fff8ef 0%,#fff4e8 100%) !important;
+      color:var(--ink);
+    }
+
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      inset:auto;
+      z-index:0;
+      pointer-events:none;
+      width:160px;
+      height:160px;
+      border-radius:40% 60% 55% 45%;
+      opacity:.22;
+      filter:blur(2px);
+    }
+    body::before{
+      top:90px;
+      right:24px;
+      background:linear-gradient(135deg,#ffd36e,#ffab8c);
+      transform:rotate(18deg);
+    }
+    body::after{
+      left:16px;
+      bottom:28px;
+      background:linear-gradient(135deg,#9edfb5,#8fded8);
+      transform:rotate(-14deg);
+    }
+
+    .page,
+    header,
+    main,
+    footer{
+      position:relative;
+      z-index:1;
+    }
+
+    .brand,
+    .card,
+    .panel,
+    .phrase-card,
+    .scale-card,
+    .student-choice-card,
+    .modal-card,
+    .section-task{
+      background:var(--paper) !important;
+      border:var(--outline);
+      border-radius:28px !important;
+      box-shadow:var(--shadow) !important;
+    }
+
+    .brand{
+      background:linear-gradient(180deg,#fffdf9,#fff7ee) !important;
+      padding:22px 24px;
+    }
+
+    .logo-mark,
+    .panel-head,
+    .modal-restart,
+    .confirm,
+    .record-btn,
+    .audio-mark{
+      background:linear-gradient(135deg,#f07d6d 0%,#ff9e52 52%,#ffd36e 100%) !important;
+      color:#fffdf8 !important;
+      border:none !important;
+      box-shadow:0 6px 0 rgba(218,115,88,.28), 0 12px 22px rgba(163,94,50,.18) !important;
+    }
+
+    .logo-mark{
+      border-radius:26px !important;
+    }
+
+    .panel{
+      overflow:hidden;
+    }
+
+    .panel-head{
+      letter-spacing:.5px;
+      border-bottom:3px solid rgba(255,255,255,.35);
+      text-shadow:0 1px 0 rgba(0,0,0,.05);
+    }
+
+    .dialogue{
+      background:linear-gradient(180deg,#fffdf9 0%,#fef8ee 100%) !important;
+      border:var(--outline);
+      border-radius:28px !important;
+      box-shadow:var(--shadow) !important;
+    }
+
+    .dialogue .panel-head,
+    .guide-panel .panel-head{
+      background:linear-gradient(135deg,#ffe3c5,#fff2d9) !important;
+      color:#ca724d !important;
+      box-shadow:none !important;
+      border-bottom:2px dashed rgba(240,125,109,.24) !important;
+      text-shadow:none !important;
+    }
+
+    .menu-top{
+      background:linear-gradient(135deg,#fff0d9,#ffe7c3) !important;
+      color:#b26a46 !important;
+      border-radius:18px;
+      font-weight:1000;
+      padding:10px 12px;
+      border:2px solid rgba(240,125,109,.12);
+    }
+
+    .category{
+      margin-top:16px;
+      padding:10px;
+      border-radius:24px;
+      background:linear-gradient(180deg,rgba(255,248,239,.96),rgba(255,253,248,.98));
+      border:2px dashed rgba(240,125,109,.14);
+    }
+
+    .cat-title{
+      border-radius:999px !important;
+      padding:6px 14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      font-weight:1000;
+      box-shadow:0 4px 0 rgba(221,148,103,.12);
+      border:2px solid rgba(255,255,255,.7);
+    }
+
+    .cat-title.orange,
+    .cat-title.cheese,
+    .cat-title.green,
+    .cat-title.teal,
+    .cat-title.pink{
+      background:linear-gradient(135deg,#ffb18b,#ffd36e) !important;
+      color:#fffdf8 !important;
+    }
+
+    .item{
+      padding:10px 10px;
+      border-radius:18px;
+      margin:6px 0;
+      background:rgba(255,255,255,.6);
+      border-bottom:0 !important;
+    }
+
+    .item:hover{
+      background:rgba(255,236,217,.72);
+    }
+
+    .item button{
+      border-radius:16px;
+      font-weight:900;
+    }
+
+    .item button:hover{
+      background:#fff0e0 !important;
+      color:#d06d4f !important;
+    }
+
+    .price{
+      color:#9f5d43 !important;
+      font-weight:1000;
+      background:#fff4e6;
+      border-radius:14px;
+      padding:4px 0;
+      border:2px solid rgba(240,125,109,.12);
+    }
+
+    .phrase-card{
+      background:linear-gradient(180deg,#fffdf9,#fff7ef) !important;
+    }
+
+    .phrase-card .chip{
+      background:linear-gradient(135deg,#8fded8,#58b7b0) !important;
+      color:#fffdf8 !important;
+      border:none;
+      box-shadow:0 4px 0 rgba(88,183,176,.2);
+    }
+
+    .section-task,
+    .section-task.active-level-task{
+      background:linear-gradient(135deg,#fff1d8,#fff9ee) !important;
+      border:3px dashed rgba(240,125,109,.36) !important;
+      box-shadow:0 8px 0 rgba(240,125,109,.08), 0 16px 30px rgba(156,96,59,.12) !important;
+    }
+
+    .section-target{
+      color:#d16f4b !important;
+    }
+
+    .bubble,
+    .green{
+      background:#ffffff !important;
+      border:3px solid rgba(242,175,116,.34) !important;
+      border-radius:24px !important;
+      box-shadow:0 7px 0 rgba(255,193,121,.12);
+      color:var(--ink) !important;
+    }
+
+    .bubble.green{
+      background:#f7fff5 !important;
+      border-color:rgba(103,183,122,.34) !important;
+      box-shadow:0 7px 0 rgba(103,183,122,.10);
+    }
+
+    .avatar{
+      box-shadow:0 6px 0 rgba(240,125,109,.12);
+      border:3px solid rgba(255,255,255,.7);
+    }
+
+    .choice{
+      background:#fffdf8 !important;
+      border:3px solid rgba(240,125,109,.18) !important;
+      border-radius:20px !important;
+      box-shadow:0 6px 0 rgba(240,125,109,.06);
+      color:#5b4b45 !important;
+      font-weight:900 !important;
+    }
+
+    .choice:hover{
+      background:#fff2e1 !important;
+      transform:translateY(-1px);
+    }
+
+    .choice.selected.sugar,
+    .choice.selected.ice,
+    .choice.selected.topping,
+    .choice.selected.size,
+    .choice.selected.bag,
+    .choice.selected.member{
+      background:linear-gradient(135deg,#67b77a 0%,#58b7b0 100%) !important;
+      border-color:#54a46a !important;
+      color:#fffdf8 !important;
+      box-shadow:0 6px 0 rgba(88,183,176,.18), 0 14px 24px rgba(88,183,176,.18) !important;
+    }
+
+    .choice-group.current-step{
+      background:linear-gradient(135deg,#fff2df,#fffaf3) !important;
+      border:4px solid rgba(255,158,82,.55) !important;
+      box-shadow:0 0 0 8px rgba(255,211,110,.18), 0 18px 30px rgba(175,119,69,.14) !important;
+    }
+
+    .choice-group.current-step::before{
+      color:#d26e4c !important;
+    }
+
+    button.scale-chip{
+      background:linear-gradient(180deg,#fffdf8,#fff2df) !important;
+      border:3px solid rgba(242,175,116,.22) !important;
+      color:#5c6d57 !important;
+      border-radius:18px !important;
+      box-shadow:0 6px 0 rgba(240,125,109,.05);
+    }
+
+    button.scale-chip:hover{
+      background:linear-gradient(180deg,#fff7eb,#ffe9c8) !important;
+      border-color:rgba(240,125,109,.42) !important;
+    }
+
+    .mini-speak,
+    .speak,
+    .play-recording-btn{
+      background:#fffdf9 !important;
+      color:#d26e4c !important;
+      border:2px solid rgba(240,125,109,.2) !important;
+      border-radius:999px !important;
+      box-shadow:0 4px 0 rgba(240,125,109,.08);
+    }
+
+    .progress-card{
+      background:linear-gradient(180deg,#fffdf8,#fff6eb) !important;
+      border:var(--outline);
+      box-shadow:var(--shadow);
+    }
+
+    .progress-fill{
+      background:linear-gradient(135deg,#67b77a,#58b7b0,#ffd36e) !important;
+    }
+
+    .note{
+      color:#8a6b5a !important;
+    }
+
+    .note + .note{
+      color:#6f564c !important;
+    }
+
+    .toast{
+      background:rgba(88,60,48,.93) !important;
+      border-radius:999px;
+      box-shadow:0 12px 24px rgba(61,42,35,.24);
+    }
+
+    @media (max-width:900px){
+      header{grid-template-columns:1fr}
+      .brand{justify-content:center}
+      .page{padding-left:14px;padding-right:14px}
+      .progress-sidebar{position:static;width:auto;max-width:460px;margin:auto}
+      main{grid-template-columns:1fr}
+      .menu-body{display:grid;grid-template-columns:repeat(2,1fr);gap:0 20px}
+      .menu-top{grid-column:1/-1}
+      .prep-bottom{grid-template-columns:1fr}
+      .phrases{grid-template-columns:1fr 1fr}
+      .phrase-title{grid-column:1/-1;justify-content:center}
+    }
+    @media (max-width:720px){
+      .page{padding:14px}
+      .menu-body{display:block}
+      .choice-group,.choice-group.ice{margin-left:0;grid-template-columns:repeat(2,1fr)}
+      .choice-note{margin-left:0}
+      .choice-group.small-options{margin-left:0;grid-template-columns:repeat(2,1fr)}
+      .recorder{grid-template-columns:1fr}
+      .wave{display:none}
+      .drink-card .content{grid-template-columns:1fr}
+      .task-body{grid-template-columns:1fr;text-align:left}
+      .mascot{display:none}
+      .phrases{grid-template-columns:1fr}
+      .top-phrases{grid-template-columns:1fr}
+      .status{grid-template-columns:1fr}
+      .level-nav{grid-template-columns:1fr}
+    }
+  
+
+    /* RWD 修正版：桌機、平板、手機都不跑版 */
+    html, body{
+      width:100%;
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    .page{
+      width:min(1440px, 100%) !important;
+      max-width:100% !important;
+      padding:clamp(12px, 2vw, 24px) !important;
+      overflow-x:hidden;
+    }
+
+    header{
+      grid-template-columns:minmax(210px,260px) minmax(0,1fr) !important;
+      gap:clamp(12px, 2vw, 22px) !important;
+    }
+
+    .brand,
+    .title,
+    .panel,
+    .menu,
+    .dialogue,
+    .side,
+    .prep-area,
+    .prep-bottom,
+    .guide-panel,
+    .guide-body,
+    .content{
+      min-width:0 !important;
+      max-width:100% !important;
+    }
+
+    main{
+      display:grid !important;
+      grid-template-columns:minmax(300px,.85fr) minmax(420px,1.25fr) minmax(310px,.85fr) !important;
+      gap:clamp(14px, 1.6vw, 22px) !important;
+      align-items:start !important;
+    }
+
+    .menu{grid-column:auto}
+    .dialogue{grid-column:auto}
+    .side{
+      display:grid;
+      gap:clamp(14px, 1.6vw, 20px);
+      min-width:0;
+    }
+
+    .prep-bottom{
+      grid-template-columns:minmax(280px,.9fr) minmax(360px,1.1fr) !important;
+    }
+
+    .menu-body{
+      min-width:0;
+    }
+
+    .menu-top,
+    .item{
+      grid-template-columns:52px minmax(0,1fr) minmax(52px,62px) minmax(52px,62px) !important;
+    }
+
+    .menu-top{
+      font-size:clamp(13px, 1.3vw, 15px);
+    }
+
+    .item{
+      min-width:0;
+    }
+
+    .item button{
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+
+    .price{
+      min-width:0;
+      text-align:center;
+      font-size:clamp(13px, 1.4vw, 16px);
+    }
+
+    .row,
+    .row.student,
+    .student-choice-row{
+      min-width:0;
+    }
+
+    .choice-group,
+    .choice-group.ice,
+    .choice-group.small-options{
+      margin-left:0 !important;
+      grid-template-columns:repeat(auto-fit, minmax(92px, 1fr)) !important;
+    }
+
+    .choice{
+      min-width:0;
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+
+    .summary-list li{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+
+    .summary-list .zhpy{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+
+    .confirm{
+      width:min(360px, 88%) !important;
+      font-size:clamp(18px, 2vw, 24px) !important;
+    }
+
+    .recorder{
+      width:min(560px, 100%) !important;
+      border-radius:28px !important;
+    }
+
+    .record-btn{
+      white-space:normal;
+      text-align:center;
+      justify-content:center;
+    }
+
+    .record-playback{
+      width:100%;
+    }
+
+    .record-audio{
+      max-width:100%;
+    }
+
+    .note{
+      display:block !important;
+      width:min(980px, 100%) !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      text-align:center !important;
+    }
+
+    .note + .note{
+      text-align:center !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+    }
+
+    @media (max-width:1280px){
+      main{
+        grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr) !important;
+      }
+      .side{
+        grid-column:1 / -1;
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        align-items:start;
+      }
+      .side .drink-card{
+        grid-column:auto;
+      }
+      .side .task{
+        grid-column:auto;
+      }
+    }
+
+    @media (max-width:1024px){
+      header{
+        grid-template-columns:1fr !important;
+        text-align:center;
+      }
+      .brand{
+        justify-content:center;
+      }
+      .title h1{
+        font-size:clamp(28px, 7vw, 44px) !important;
+      }
+      .title p{
+        font-size:clamp(15px, 3.4vw, 18px) !important;
+        letter-spacing:.08em !important;
+      }
+      main{
+        grid-template-columns:1fr !important;
+      }
+      .menu,
+      .dialogue,
+      .side{
+        grid-column:1 / -1 !important;
+      }
+      .side{
+        grid-template-columns:1fr !important;
+      }
+      .prep-bottom{
+        grid-template-columns:1fr !important;
+      }
+      .guide-body{
+        grid-template-columns:1fr !important;
+      }
+      .content{
+        grid-template-columns:minmax(160px,.8fr) minmax(0,1.2fr) !important;
+      }
+    }
+
+    @media (max-width:680px){
+      .page{
+        padding:10px !important;
+      }
+
+      .toolbar{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        justify-content:center;
+      }
+
+      .toolbar button{
+        flex:1 1 140px;
+        min-width:0;
+      }
+
+      .brand{
+        flex-direction:column;
+        text-align:center;
+        padding:16px 14px !important;
+      }
+
+      .logo-mark{
+        width:54px !important;
+        height:54px !important;
+      }
+
+      .panel-head{
+        font-size:clamp(19px, 5.2vw, 23px) !important;
+        padding:13px 14px !important;
+        gap:8px;
+      }
+
+      .prep-area{
+        gap:12px !important;
+      }
+
+      .phrase-card,
+      .scale-card,
+      .student-choice-card{
+        padding:12px !important;
+      }
+
+      .scale-line{
+        display:grid !important;
+        grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+        gap:8px !important;
+      }
+
+      .scale-chip{
+        min-width:0 !important;
+        width:100% !important;
+        padding:9px 8px !important;
+        font-size:14px !important;
+      }
+
+      .menu-body{
+        padding:10px 10px 14px !important;
+      }
+
+      .menu-top,
+      .item{
+        grid-template-columns:38px minmax(0,1fr) 46px 46px !important;
+        gap:4px !important;
+      }
+
+      .menu-top{
+        padding:8px 6px !important;
+      }
+
+      .category{
+        padding:8px !important;
+      }
+
+      .cat-title{
+        font-size:16px !important;
+      }
+
+      .item{
+        padding:8px 6px !important;
+        font-size:14px !important;
+      }
+
+      .item span:first-child{
+        font-size:20px;
+      }
+
+      .price{
+        font-size:13px !important;
+        padding:4px 0 !important;
+      }
+
+      .dialogue-body{
+        padding:12px !important;
+      }
+
+      .row,
+      .row.student,
+      .student-choice-row{
+        grid-template-columns:42px minmax(0,1fr) !important;
+        gap:8px !important;
+      }
+
+      .row.student,
+      .student-choice-row{
+        grid-template-columns:minmax(0,1fr) 42px !important;
+      }
+
+      .avatar{
+        width:42px !important;
+        height:42px !important;
+        font-size:24px !important;
+      }
+
+      .avatar::after{
+        font-size:10px !important;
+        bottom:-17px !important;
+      }
+
+      .bubble{
+        font-size:16px !important;
+        padding:12px 42px 12px 12px !important;
+        border-radius:18px !important;
+      }
+
+      .speak{
+        right:8px !important;
+        width:30px !important;
+        height:30px !important;
+      }
+
+      .choice-group,
+      .choice-group.ice,
+      .choice-group.small-options{
+        grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+        gap:8px !important;
+      }
+
+      .choice{
+        font-size:15px !important;
+        padding:10px 6px !important;
+      }
+
+      .recorder{
+        grid-template-columns:1fr !important;
+        padding:12px !important;
+      }
+
+      .wave{
+        display:none !important;
+      }
+
+      .record-btn{
+        width:100%;
+        font-size:19px !important;
+        padding:12px 16px !important;
+      }
+
+      .record-msg{
+        font-size:14px !important;
+        padding:0 10px;
+      }
+
+      .content{
+        grid-template-columns:1fr !important;
+        padding:16px 14px !important;
+      }
+
+      .cup{
+        height:150px !important;
+      }
+
+      .cup svg{
+        max-width:118px !important;
+      }
+
+      .summary-list li{
+        font-size:16px !important;
+        padding:10px 0 !important;
+      }
+
+      .summary-list span.icon{
+        font-size:21px !important;
+        width:24px !important;
+      }
+
+      .confirm{
+        width:92% !important;
+        padding:13px 16px !important;
+      }
+
+      .task-body{
+        grid-template-columns:1fr !important;
+        padding:16px !important;
+      }
+
+      .mascot{
+        display:none !important;
+      }
+
+      .toast{
+        width:calc(100% - 24px);
+        border-radius:18px !important;
+        bottom:14px !important;
+        padding:12px 14px !important;
+      }
+
+      .note{
+        font-size:12px !important;
+        line-height:1.65 !important;
+        padding:0 8px;
+      }
+    }
+
+    @media (max-width:390px){
+      .menu-top,
+      .item{
+        grid-template-columns:30px minmax(0,1fr) 40px 40px !important;
+      }
+
+      .choice-group,
+      .choice-group.ice,
+      .choice-group.small-options,
+      .scale-line{
+        grid-template-columns:1fr !important;
+      }
+
+      .title h1{
+        font-size:26px !important;
+      }
+
+      .panel-head{
+        font-size:18px !important;
+      }
+    }
+
+
+
+    /* 最終排版調整：三關改成上下排列，電腦與手機都更穩定 */
+    main{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      gap:22px !important;
+      align-items:start !important;
+      max-width:1120px !important;
+      margin:0 auto !important;
+    }
+
+    .menu,
+    .dialogue,
+    .side{
+      grid-column:1 / -1 !important;
+      width:100% !important;
+      max-width:100% !important;
+    }
+
+    .side{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      gap:22px !important;
+    }
+
+    .drink-card,
+    .task{
+      width:100% !important;
+      max-width:100% !important;
+    }
+
+    .prep-bottom{
+      grid-template-columns:1fr !important;
+    }
+
+    .guide-body{
+      grid-template-columns:1fr !important;
+    }
+
+    .menu-body{
+      display:block !important;
+      width:100% !important;
+    }
+
+    .category{
+      width:100% !important;
+    }
+
+    .menu-top{
+      grid-template-columns:56px minmax(220px,1fr) 70px 70px !important;
+      align-items:center !important;
+    }
+
+    .item{
+      grid-template-columns:56px minmax(220px,1fr) 70px 70px !important;
+      align-items:center !important;
+      column-gap:12px !important;
+    }
+
+    .item button.zhpy,
+    .item button{
+      display:block !important;
+      width:100% !important;
+      text-align:left !important;
+      line-height:1.5 !important;
+      word-break:keep-all !important;
+      overflow-wrap:normal !important;
+      white-space:normal !important;
+      writing-mode:horizontal-tb !important;
+    }
+
+    .item button.zhpy::before,
+    .item button.zhpy::after{
+      display:inline-block !important;
+      margin-left:8px !important;
+      line-height:1.3 !important;
+      vertical-align:middle !important;
+      max-width:100% !important;
+    }
+
+    .price{
+      min-width:58px !important;
+      white-space:nowrap !important;
+    }
+
+    .record-msg{
+      text-align:center !important;
+      width:100% !important;
+      max-width:760px !important;
+      margin:12px auto 0 !important;
+      display:block !important;
+    }
+
+    .record-msg.zhpy::before,
+    .record-msg.zhpy::after{
+      text-align:center !important;
+      display:block !important;
+      width:100% !important;
+    }
+
+    @media (max-width:680px){
+      main{
+        max-width:100% !important;
+        gap:16px !important;
+      }
+
+      .menu-top{
+        grid-template-columns:38px minmax(0,1fr) 50px 50px !important;
+      }
+
+      .item{
+        grid-template-columns:38px minmax(0,1fr) 50px 50px !important;
+        column-gap:6px !important;
+      }
+
+      .item button.zhpy,
+      .item button{
+        word-break:keep-all !important;
+        overflow-wrap:anywhere !important;
+        font-size:15px !important;
+      }
+
+      .item button.zhpy::before,
+      .item button.zhpy::after{
+        display:block !important;
+        margin-left:0 !important;
+        margin-top:2px !important;
+      }
+
+      .price{
+        min-width:0 !important;
+      }
+    }
+
+
+
+    /* Toggle 修正：關閉拼音／英文時，飲品項目的拼音與英文也要確實隱藏 */
+    body.hide-pinyin .zhpy::after,
+    body.hide-pinyin .item button.zhpy::after,
+    body.hide-pinyin .mini-text.zhpy::after,
+    body.hide-pinyin .note.zhpy::after,
+    body.hide-pinyin .scale-chip::after{
+      display:none !important;
+      content:"" !important;
+    }
+
+    body.hide-en .zhpy::before,
+    body.hide-en .item button.zhpy::before,
+    body.hide-en .mini-text.zhpy::before,
+    body.hide-en .note.zhpy::before{
+      display:none !important;
+      content:"" !important;
+    }
+
+    /* 菜單表頭與品項四欄對齊：圖示 / 品項 / L / 瓶 */
+    .menu-top,
+    .item{
+      grid-template-columns:56px minmax(220px,1fr) 70px 70px !important;
+    }
+    .menu-top span:nth-child(3),
+    .menu-top span:nth-child(4),
+    .item .price{
+      justify-self:center !important;
+      align-self:center !important;
+      text-align:center !important;
+    }
+    .menu-top span:nth-child(2){
+      justify-self:start !important;
+    }
+
+    @media (max-width:680px){
+      .menu-top,
+      .item{
+        grid-template-columns:38px minmax(0,1fr) 50px 50px !important;
+      }
+    }
+
+    @media (max-width:390px){
+      .menu-top,
+      .item{
+        grid-template-columns:30px minmax(0,1fr) 40px 40px !important;
+      }
+    }
+
+
+
+    /* 甜度與冰塊量表：按鈕置中 */
+    .scale-card{
+      text-align:center !important;
+    }
+    .scale-card h3{
+      justify-content:center !important;
+      text-align:center !important;
+    }
+    .scale-line{
+      justify-content:center !important;
+      align-items:center !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+    }
+    .scale-line .scale-chip{
+      justify-content:center !important;
+      align-items:center !important;
+      text-align:center !important;
+    }
+
+    @media (max-width:680px){
+      .scale-line{
+        justify-items:center !important;
+      }
+      .scale-line .scale-chip{
+        width:100% !important;
+      }
+    }
+
+
+
+    /* 標題與品牌區美化 */
+    header{
+      align-items:stretch !important;
+    }
+    .brand{
+      position:relative;
+      overflow:hidden;
+      align-self:stretch;
+      justify-content:flex-start;
+      padding:18px 20px !important;
+      gap:16px !important;
+    }
+    .brand::before{
+      content:"";
+      position:absolute;
+      right:-30px;
+      top:-36px;
+      width:110px;
+      height:110px;
+      border-radius:50%;
+      background:rgba(255,211,110,.34);
+    }
+    .brand::after{
+      content:"";
+      position:absolute;
+      right:16px;
+      bottom:14px;
+      width:52px;
+      height:52px;
+      border-radius:20px;
+      background:rgba(103,183,122,.18);
+      transform:rotate(18deg);
+    }
+    .brand .logo-mark{
+      flex:0 0 auto;
+      z-index:1;
+    }
+    .brand-copy{
+      position:relative;
+      z-index:1;
+      min-width:0;
+    }
+    .brand-kicker{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      margin-bottom:7px;
+      border-radius:999px;
+      background:#fff0d8;
+      color:#c36b45;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.03em;
+      white-space:nowrap;
+    }
+    .brand strong.zhpy{
+      font-size:clamp(24px, 2.2vw, 32px) !important;
+      color:#bd6447 !important;
+      line-height:1.18;
+    }
+    .brand span.zhpy{
+      margin-top:6px !important;
+      font-size:14px !important;
+      color:#6f7f52 !important;
+      font-weight:900;
+    }
+    .brand-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:10px;
+    }
+    .brand-tags span{
+      display:inline-flex;
+      align-items:center;
+      gap:3px;
+      padding:5px 8px;
+      border-radius:999px;
+      background:#fffaf1;
+      border:2px solid rgba(240,125,109,.16);
+      color:#7a5a4a;
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .site-title{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      text-align:center;
+      margin:0;
+    }
+    .site-title .title-line{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      line-height:1.1;
+    }
+    .site-title .title-zh{
+      font-size:clamp(30px, 4vw, 54px);
+      color:#bd6447;
+      font-weight:1000;
+      letter-spacing:.04em;
+      text-shadow:0 2px 0 rgba(255,255,255,.75);
+    }
+    .site-title .title-en{
+      font-size:clamp(18px, 2.2vw, 30px);
+      color:#6f7f52;
+      font-weight:1000;
+      letter-spacing:.08em;
+    }
+    .title{
+      display:grid;
+      place-items:center;
+      min-width:0;
+    }
+    .title p{
+      letter-spacing:.12em !important;
+      text-align:center;
+    }
+
+    @media (max-width:680px){
+      .brand{
+        align-items:center;
+        text-align:center;
+      }
+      .brand-tags{
+        justify-content:center;
+      }
+      .brand-kicker{
+        white-space:normal;
+        text-align:center;
+      }
+      .site-title .title-zh{
+        font-size:clamp(28px, 8vw, 38px);
+      }
+      .site-title .title-en{
+        font-size:clamp(17px, 5vw, 24px);
+      }
+    }
+
+
+
+    /* 甜度與冰塊量表：音檔圖示改成與常用點餐句型一致 */
+    .scale-chip .audio-mark{
+      display:inline-grid !important;
+      place-items:center !important;
+      width:34px !important;
+      height:34px !important;
+      margin-top:6px !important;
+      padding:0 !important;
+      border-radius:999px !important;
+      background:#fffdf9 !important;
+      color:#d26e4c !important;
+      border:2px solid rgba(240,125,109,.2) !important;
+      box-shadow:0 4px 0 rgba(240,125,109,.08) !important;
+      font-size:18px !important;
+      line-height:1 !important;
+    }
+    .scale-chip:hover .audio-mark{
+      transform:scale(1.05);
+    }
+
+    /* 第 2 關模擬對話欄位：改成與其他關卡一致的主色系 */
+    .dialogue .panel-head{
+      background:linear-gradient(135deg,#f07d6d 0%,#ff9e52 52%,#ffd36e 100%) !important;
+      color:#fffdf8 !important;
+      border-bottom:3px solid rgba(255,255,255,.35) !important;
+      box-shadow:0 6px 0 rgba(218,115,88,.22), 0 12px 22px rgba(163,94,50,.16) !important;
+      text-shadow:0 1px 0 rgba(0,0,0,.05) !important;
+    }
+    .dialogue .hint-small{
+      color:#fffdf8 !important;
+      opacity:.95;
+    }
+
+
+
+    /* 品牌區修正：置中、中文一行、英文一行、icon 不跑版 */
+    .brand{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      justify-items:center !important;
+      align-items:center !important;
+      text-align:center !important;
+      gap:12px !important;
+      padding:22px 20px !important;
+      min-height:220px;
+    }
+    .brand .logo-mark{
+      position:relative !important;
+      width:68px !important;
+      height:68px !important;
+      margin:0 auto 4px !important;
+      display:grid !important;
+      place-items:center !important;
+      font-size:34px !important;
+      line-height:1 !important;
+      transform:none !important;
+      flex:none !important;
+    }
+    .brand-copy{
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      width:100% !important;
+      min-width:0 !important;
+    }
+    .brand-kicker{
+      order:2;
+      margin:8px auto 0 !important;
+      white-space:normal !important;
+      text-align:center !important;
+    }
+    .brand strong.zhpy{
+      order:1;
+      display:block !important;
+      width:100% !important;
+      text-align:center !important;
+      align-items:center !important;
+      font-size:clamp(28px, 2.8vw, 38px) !important;
+      line-height:1.15 !important;
+    }
+    .brand span.zhpy{
+      order:3;
+      display:block !important;
+      width:100% !important;
+      text-align:center !important;
+      align-items:center !important;
+      margin-top:10px !important;
+      font-size:clamp(15px, 1.4vw, 18px) !important;
+      line-height:1.35 !important;
+    }
+    .brand strong.zhpy::before,
+    .brand strong.zhpy::after,
+    .brand span.zhpy::before,
+    .brand span.zhpy::after{
+      text-align:center !important;
+      width:100% !important;
+    }
+    .brand-tags{
+      display:none !important;
+    }
+
+    @media (max-width:680px){
+      .brand{
+        min-height:auto !important;
+        padding:18px 16px !important;
+      }
+      .brand .logo-mark{
+        width:62px !important;
+        height:62px !important;
+        font-size:31px !important;
+      }
+    }
+
+</style>
+</head>
+<body>
+  <div class="fruit left">🍇🍊</div>
+  <div class="fruit right">🥭</div>
+  <div class="fruit top">🍃</div>
+
+  <div class="page">
+    <div class="toolbar"><button id="pinyinToggle" class="pinyin-toggle">拼音：開啟</button><button id="englishToggle" class="english-toggle">英文：開啟</button></div>
+
+    <header>
+      <div class="brand" aria-label="教學模擬店標誌">
+        <div class="logo-mark">飲</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Mandarin Speaking Practice</div>
+          <strong class="zhpy" data-pinyin="jiào xué mó nǐ diàn">教學模擬店</strong>
+          <span class="zhpy" data-pinyin="tái wān shǒu yáo yǐn kǒu shuō liàn xí">台灣手搖飲口說練習</span>
+        </div>
+      </div>
+
+      <div class="title">
+        <h1 class="site-title">
+          <span class="title-line title-zh"><span class="leaf">🍃</span>台灣飲料點餐練習<span class="leaf">🍃</span></span>
+          <span class="title-line title-en">Drink Ordering Game</span>
+        </h1>
+        <p class="zhpy" data-pinyin="tīng yì tīng, shuō yì shuō, diǎn yì bēi nǐ xǐ huān de yǐn liào!">聽一聽、說一說、點一杯你喜歡的飲料！🧋</p>
+      </div>
+
+      <div class="status progress-sidebar" aria-label="進度欄">
+        <div class="card">
+          <div class="progress-label zhpy" data-pinyin="jìn dù lán" data-en="Progress">進度欄</div>
+          <div class="progress-title zhpy" id="progressTitle" data-pinyin="dì yī guān / gòng sān guān">第 <b id="level">1</b> 關／共 3 關</div>
+          <div class="bar"><span id="progressBar"></span></div>
+          <div class="progress-steps" aria-label="三關進度">
+            <button class="progress-step" id="step1" type="button" data-level-jump="1"><span class="step-dot">1</span><span class="zhpy" data-pinyin="yǐn pǐn MENU" data-en="Drink Menu">飲品 MENU</span></button>
+            <button class="progress-step" id="step2" type="button" data-level-jump="2"><span class="step-dot">2</span><span class="zhpy" data-pinyin="mó nǐ duì huà" data-en="Dialogue Practice">模擬對話</span></button>
+            <button class="progress-step" id="step3" type="button" data-level-jump="3"><span class="step-dot">3</span><span class="zhpy" data-pinyin="nǐ de yǐn liào" data-en="Your Drink">你的飲料</span></button>
+          </div>
+        </div>
+        <div class="card score" aria-label="分數">
+          <span id="star1" class="empty">⭐</span><span id="star2" class="empty">⭐</span><span id="star3" class="empty">⭐</span>
+          <b><span id="score">0</span> / 3</b>
+        </div>
+      </div>
+    </header>
+
+<section class="prep-area" aria-label="課前練習">
+<div class="prep-bottom">
+        <section class="panel guide-panel" aria-label="甜度與冰塊量表">
+          <div class="panel-head"><span class="zhpy" data-pinyin="tián dù yǔ bīng kuài liàng biǎo" data-en="Sweetness & Ice Guide">📏 甜度與冰塊量表</span></div>
+          <div class="guide-body">
+            <div class="scale-card">
+              <h3 class="zhpy" data-pinyin="tián dù liàng biǎo" data-en="Sweetness Scale">🍯 甜度量表</h3>
+              <div class="scale-line">
+                <button type="button" class="scale-chip" data-icon="⬜ ⬜ ⬜ ⬜" data-pinyin="quán táng" data-say="全糖" aria-label="播放「全糖」" title="播放「全糖」" data-audio-label="全糖">全糖<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="⬜ ⬜" data-pinyin="bàn táng" data-say="半糖" aria-label="播放「半糖」" title="播放「半糖」" data-audio-label="半糖">半糖<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="⬜" data-pinyin="wéi táng" data-say="微糖" aria-label="播放「微糖」" title="播放「微糖」" data-audio-label="微糖">微糖<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="🚫 ⬜" data-pinyin="wú táng" data-say="無糖" aria-label="播放「無糖」" title="播放「無糖」" data-audio-label="無糖">無糖<span class="audio-mark">🔊</span></button>
+              </div>
+            </div>
+            <div class="scale-card">
+              <h3 class="zhpy" data-pinyin="bīng kuài liàng biǎo" data-en="Ice Level Scale">🧊 冰塊量表</h3>
+              <div class="scale-line">
+                <button type="button" class="scale-chip" data-icon="🧊 🧊 🧊 🧊" data-pinyin="zhèng cháng bīng" data-say="正常冰" aria-label="播放「正常冰」" title="播放「正常冰」" data-audio-label="正常冰">正常冰<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="🧊 🧊" data-pinyin="shǎo bīng" data-say="少冰" aria-label="播放「少冰」" title="播放「少冰」" data-audio-label="少冰">少冰<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="🧊" data-pinyin="wéi bīng" data-say="微冰" aria-label="播放「微冰」" title="播放「微冰」" data-audio-label="微冰">微冰<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="🚫 🧊" data-pinyin="qù bīng" data-say="去冰" aria-label="播放「去冰」" title="播放「去冰」" data-audio-label="去冰">去冰<span class="audio-mark">🔊</span></button>
+                <button type="button" class="scale-chip" data-icon="♨️" data-pinyin="rè" data-say="熱" aria-label="播放「熱」" title="播放「熱」" data-audio-label="熱">熱<span class="audio-mark">🔊</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="phrases top-phrases" aria-label="常用點餐句型">
+          <div class="phrase-title zhpy" data-pinyin="cháng yòng diǎn cān jù xíng">💬 常用點餐句型</div>
+          <div class="phrase-card p1"><span class="badge b1">1</span><span id="phrase1Text" class="mini-text zhpy" data-pinyin="wǒ yào yì bēi...">我要一杯……</span><button class="mini-speak" data-say="我要一杯紅茶。">🔊</button></div>
+          <div class="phrase-card p2"><span class="badge b2">2</span><span id="phrase2Text" class="mini-text zhpy" data-pinyin="tián dù yào..." data-en="Sweetness should be...">甜度要……</span><button class="mini-speak" data-say="甜度要">🔊</button></div>
+          <div class="phrase-card p3"><span class="badge b3">3</span><span id="phrase3Text" class="mini-text zhpy" data-pinyin="bīng kuài yào..." data-en="Ice should be...">冰塊要……</span><button class="mini-speak" data-say="冰塊要">🔊</button></div>
+          <div class="phrase-card p4"><span class="badge b4">4</span><span id="phrase4Text" class="mini-text zhpy" data-pinyin="wǒ yào mǎi yí ge dài zi.">我要買一個袋子。</span><button class="mini-speak" data-say="我要買一個袋子。">🔊</button></div>
+        </section>
+      </div>
+    </section>
+
+    <main>
+      <section class="panel menu" id="menuPanel" aria-label="飲品菜單">
+        <div class="panel-head"><span class="zhpy" data-pinyin="dì yī guān, yǐn pǐn cài dān">第 1 關｜飲品 MENU</span><span>🥤</span></div>
+        <div class="section-task active-level-task" id="menuTaskBox"><span id="menuTaskText" class="section-target zhpy" data-pinyin="qǐng diǎn xuǎn nǐ xiǎng hē de yǐn pǐn" data-en="Please choose a drink.">請點選你想喝的飲品。</span></div>
+        <div class="menu-body">
+          <div class="menu-top"><span></span><span>品項</span><span>L</span><span>瓶</span></div>
+
+          <div class="category">
+            <div class="cat-title teal"><span class="zhpy" data-pinyin="yuán wèi chá xì liè">原味茶系列</span></div>
+            <div class="item"><span>🍂</span><button data-drink="紅茶" data-price-m="40" data-price-l="40" data-price-b="65" class="zhpy" data-pinyin="hóng chá">紅茶</button><span class="price">40</span><span class="price">65</span></div>
+            <div class="item"><span>🍃</span><button data-drink="青茶" data-price-m="40" data-price-l="40" data-price-b="65" class="zhpy" data-pinyin="qīng chá">青茶</button><span class="price">40</span><span class="price">65</span></div>
+            <div class="item"><span>🌿</span><button data-drink="烏龍茶" data-price-m="45" data-price-l="45" data-price-b="70" class="zhpy" data-pinyin="wū lóng chá">烏龍茶</button><span class="price">45</span><span class="price">70</span></div>
+            <div class="item"><span>🌱</span><button data-drink="金萱" data-price-m="45" data-price-l="45" data-price-b="70" class="zhpy" data-pinyin="jīn xuān">金萱</button><span class="price">45</span><span class="price">70</span></div>
+            <div class="item"><span>🍯</span><button data-drink="冬瓜茶" data-price-m="45" data-price-l="45" data-price-b="70" class="zhpy" data-pinyin="dōng guā chá">冬瓜茶</button><span class="price">45</span><span class="price">70</span></div>
+            <div class="item"><span>🍯🍃</span><button data-drink="冬瓜青" data-price-m="50" data-price-l="50" data-price-b="75" class="zhpy" data-pinyin="dōng guā qīng">冬瓜青</button><span class="price">50</span><span class="price">75</span></div>
+          </div>
+
+          <div class="category">
+            <div class="cat-title green"><span class="zhpy" data-pinyin="xiān guǒ chá yǐn">鮮果茶飲</span></div>
+            <div class="item"><span>🍂🍋</span><button data-drink="檸檬紅茶" data-price-m="55" data-price-l="55" data-price-b="85" class="zhpy" data-pinyin="níng méng hóng chá">檸檬紅茶</button><span class="price">55</span><span class="price">85</span></div>
+            <div class="item"><span>🍃🍊</span><button data-drink="柳橙綠茶" data-price-m="65" data-price-l="65" data-price-b="95" class="zhpy" data-pinyin="liǔ chéng lǜ chá">柳橙綠茶</button><span class="price">65</span><span class="price">95</span></div>
+            <div class="item"><span>🍃🥭</span><button data-drink="百香綠茶" data-price-m="60" data-price-l="60" data-price-b="90" class="zhpy" data-pinyin="bǎi xiāng lǜ chá">百香綠茶</button><span class="price">60</span><span class="price">90</span></div>
+            <div class="item"><span>🍃🥭</span><button data-drink="芒果綠茶" data-price-m="70" data-price-l="70" data-price-b="105" class="zhpy" data-pinyin="máng guǒ lǜ chá">芒果綠茶</button><span class="price">70</span><span class="price">105</span></div>
+          </div>
+
+          <div class="category">
+            <div class="cat-title pink"><span class="zhpy" data-pinyin="ná tiě xì liè">拿鐵系列</span></div>
+            <div class="item"><span>🍂🥛</span><button data-drink="紅茶拿鐵" data-price-m="70" data-price-l="70" data-price-b="95" class="zhpy" data-pinyin="hóng chá ná tiě">紅茶拿鐵</button><span class="price">70</span><span class="price">95</span></div>
+            <div class="item"><span>🍃🥛</span><button data-drink="青茶拿鐵" data-price-m="70" data-price-l="70" data-price-b="95" class="zhpy" data-pinyin="qīng chá ná tiě">青茶拿鐵</button><span class="price">70</span><span class="price">95</span></div>
+            <div class="item"><span>🌿🥛</span><button data-drink="烏龍拿鐵" data-price-m="75" data-price-l="75" data-price-b="100" class="zhpy" data-pinyin="wū lóng ná tiě">烏龍拿鐵</button><span class="price">75</span><span class="price">100</span></div>
+            <div class="item"><span>🍂🥛</span><button data-drink="紅茶珍珠拿鐵" data-price-m="75" data-price-l="75" data-price-b="100" class="zhpy" data-pinyin="hóng chá zhēn zhū ná tiě">紅茶珍珠拿鐵</button><span class="price">75</span><span class="price">100</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel dialogue" id="dialoguePanel" aria-label="模擬對話">
+        <div class="panel-head">
+          <span><span class="zhpy" data-pinyin="dì èr guān, mó nǐ duì huà">💬 第 2 關｜模擬對話</span> <span class="hint-small zhpy" data-pinyin="kāi kǒu shuō zhōng wén, wán chéng diǎn cān ba!">開口說中文，完成點餐吧！</span></span>
+        </div>
+        <div class="section-task" id="dialogueTaskBox"><span id="dialogueTaskText" class="section-target zhpy" data-pinyin="qǐng wán chéng tián dù, bīng kuài, jiā liào, dài zi hé huì yuán zài jù" data-en="Please complete sweetness, ice, toppings, bag, and membership/carrier.">請完成甜度、冰塊、加料、袋子、會員／載具。</span></div>
+        <div class="dialogue-body">
+          <div class="row" id="clerkDrinkRow">
+            <div class="avatar" data-label="店員">👩🏻‍🍳</div>
+            <div class="bubble"><span class="zhpy" id="clerkQuestion1" data-pinyin="nín hǎo, qǐng wèn yào hē shén me?">您好，請問要喝什麼？</span>
+              <button class="speak" data-say="您好，請問要喝什麼？" aria-label="播放店員句子">🔊</button>
+            </div>
+          </div>
+
+          <div class="row student" id="studentDrinkRow">
+            <div class="bubble green"><span id="studentDrinkSentence" class="zhpy" data-pinyin="wǒ yào yì bēi hóng chá.">我要一杯紅茶。</span>
+              <button class="speak" data-say-target="studentDrinkSentence" aria-label="播放學生句子">🔊</button>
+            </div>
+            <div class="avatar" data-label="學生">🧑🏻‍🎓</div>
+          </div>
+
+          <div class="row" id="clerkSugarIceRow">
+            <div class="avatar" data-label="店員">👩🏻‍🍳</div>
+            <div class="bubble"><span class="zhpy" id="clerkQuestion2" data-pinyin="qǐng wèn, tián dù bīng kuài?" data-en="Sweetness and ice level?">請問，甜度冰塊？</span>
+              <button class="speak" data-say="請問，甜度冰塊？" aria-label="播放甜度冰塊問題">🔊</button>
+            </div>
+          </div>
+
+          <div class="row student-choice-row" id="studentOptionsRow">
+            <div class="student-choice-card">
+              <div class="choice-note zhpy" data-pinyin="bēi xíng" data-en="Cup Size">杯型</div>
+              <div class="choice-group small-options" id="sizeGroup" data-group="size">
+                <button class="choice size zhpy" data-pinyin="dà bēi" data-value="大杯">大杯</button>
+                <button class="choice size zhpy" data-pinyin="píng zhuāng" data-value="瓶裝">瓶裝</button>
+              </div>
+
+              <div class="choice-note zhpy" data-pinyin="tián dù" data-en="Sweetness">甜度</div>
+              <div class="choice-group" id="sugarGroup" data-group="sugar">
+                <button class="choice sugar zhpy" data-pinyin="quán táng" data-value="全糖">全糖</button>
+                <button class="choice sugar selected zhpy" data-pinyin="bàn táng" data-value="半糖">半糖</button>
+                <button class="choice sugar zhpy" data-pinyin="wéi táng" data-value="微糖">微糖</button>
+                <button class="choice sugar zhpy" data-pinyin="wú táng" data-value="無糖">無糖</button>
+              </div>
+
+              <div class="choice-note zhpy" data-pinyin="bīng kuài" data-en="Ice">冰塊</div>
+              <div class="choice-group ice" id="iceGroup" data-group="ice">
+                <button class="choice ice zhpy" data-pinyin="zhèng cháng bīng" data-value="正常冰">正常冰</button>
+                <button class="choice ice selected zhpy" data-pinyin="shǎo bīng" data-value="少冰">少冰</button>
+                <button class="choice ice zhpy" data-pinyin="wéi bīng" data-value="微冰">微冰</button>
+                <button class="choice ice zhpy" data-pinyin="qù bīng" data-value="去冰">去冰</button>
+                <button class="choice ice zhpy" data-pinyin="rè" data-value="熱">熱</button>
+              </div>
+
+              <div class="choice-note zhpy" data-pinyin="jiā liào" data-en="Toppings">加料</div>
+              <div class="choice-group" id="toppingGroup" data-group="topping">
+                <button class="choice topping selected zhpy" data-pinyin="zhēn zhū" data-value="加珍珠">珍珠</button>
+                <button class="choice topping zhpy" data-pinyin="yé guǒ" data-value="加椰果">椰果</button>
+                <button class="choice topping zhpy" data-pinyin="hán tiān" data-value="加寒天">寒天</button>
+                <button class="choice topping zhpy" data-pinyin="X" data-en="No topping" data-value="X">X</button>
+              </div>
+            </div>
+            <div class="avatar" data-label="學生">🧑🏻‍🎓</div>
+          </div>
+
+          <div class="row" id="clerkBagRow">
+            <div class="avatar" data-label="店員">👩🏻‍🍳</div>
+            <div class="bubble"><span class="zhpy" id="clerkBagQuestion" data-pinyin="xū yào mǎi dài zi ma?" data-en="Do you need to buy a bag?">需要買袋子嗎？</span>
+              <button class="speak" data-say="需要買袋子嗎？" aria-label="播放袋子問題">🔊</button>
+            </div>
+          </div>
+          <div class="row student-choice-row" id="bagOptionsRow">
+            <div class="student-choice-card">
+              <div class="choice-note zhpy" data-pinyin="dài zi" data-en="Bag">袋子</div>
+              <div class="choice-group small-options" id="bagGroup" data-group="bag">
+                <button class="choice bag zhpy" data-pinyin="hǎo" data-value="好">好</button>
+                <button class="choice bag zhpy" data-pinyin="bú yòng, xiè xie" data-value="不用，謝謝">不用，謝謝</button>
+              </div>
+            </div>
+            <div class="avatar" data-label="學生">🧑🏻‍🎓</div>
+          </div>
+
+          <div class="row" id="clerkMemberRow">
+            <div class="avatar" data-label="店員">👩🏻‍🍳</div>
+            <div class="bubble"><span class="zhpy" id="clerkMemberQuestion" data-pinyin="huì yuán zài jù yǒu ma?" data-en="Do you have a membership or receipt carrier?">會員載具有嗎？</span>
+              <button class="speak" data-say="會員載具有嗎？" aria-label="播放會員載具問題">🔊</button>
+            </div>
+          </div>
+          <div class="row student-choice-row" id="memberOptionsRow">
+            <div class="student-choice-card">
+              <div class="choice-note zhpy" data-pinyin="huì yuán / zài jù" data-en="Membership / Carrier">會員／載具</div>
+              <div class="choice-group small-options" id="memberGroup" data-group="member">
+                <button class="choice member zhpy" data-pinyin="wǒ yǒu zài jù" data-value="我有載具">我有載具</button>
+                <button class="choice member zhpy" data-pinyin="wǒ yǒu huì yuán" data-value="我有會員">我有會員</button>
+                <button class="choice member zhpy" data-pinyin="dōu bú yòng" data-value="都不用">都不用</button>
+                <button class="choice member zhpy" data-pinyin="dōu yào" data-value="都要">都要</button>
+              </div>
+            </div>
+            <div class="avatar" data-label="學生">🧑🏻‍🎓</div>
+          </div>
+
+          <div class="recorder">
+            <div class="wave" aria-hidden="true"></div>
+            <button id="recordBtn" class="record-btn" type="button" aria-pressed="false" title="按一下開始錄音，再按一下停止錄音"><span class="zhpy" id="recordBtnLabel" data-pinyin="lù yīn huí dá">🎙️ 錄音回答</span></button>
+            <div class="wave" aria-hidden="true"></div>
+          </div>
+          <div id="recordMsg" class="record-msg zhpy" data-pinyin="àn xià lù yīn, shuō chū nǐ de wán zhěng dá àn.">按下錄音，說出你的完整答案。</div>
+          <div class="record-playback">
+            <button id="playRecordingBtn" class="play-recording-btn hidden" type="button">▶️ 聆聽自己的錄音</button>
+            <audio id="recordingPlayback" class="record-audio hidden" controls></audio>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="panel drink-card" id="summaryPanel" aria-label="你的飲料">
+          <div class="panel-head"><span class="zhpy" data-pinyin="dì sān guān, nǐ de yǐn liào">第 3 關｜你的飲料</span><span>🧾</span></div>
+          <div class="section-task" id="summaryTaskBox"><span id="summaryTaskText" class="section-target zhpy" data-pinyin="què rèn cān diǎn: qǐng jiǎn chá nèi róng hòu, zài àn xià què rèn diǎn cān" data-en="Confirm order: check the items, then press Confirm Order.">確認餐點：請檢查飲料內容後，再按下「確認點餐」。</span></div>
+          <div class="content">
+            <div class="cup" aria-label="飲料杯插圖">
+              <svg viewBox="0 0 220 330" role="img" aria-label="果茶杯">
+                <defs>
+                  <linearGradient id="tea" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#ffd16b"/>
+                    <stop offset=".45" stop-color="#ffa52f"/>
+                    <stop offset="1" stop-color="#f27c18"/>
+                  </linearGradient>
+                  <linearGradient id="lid" x1="0" x2="1">
+                    <stop offset="0" stop-color="#fff"/>
+                    <stop offset="1" stop-color="#ffe9cc"/>
+                  </linearGradient>
+                </defs>
+                <path d="M104 8h14v82h-14z" fill="#f8f2e7" stroke="#d9b98f" stroke-width="4" rx="4"/>
+                <ellipse cx="111" cy="82" rx="72" ry="22" fill="url(#lid)" stroke="#d8b27e" stroke-width="5"/>
+                <path d="M49 88h124l-17 205c-2 21-19 31-45 31s-43-10-45-31L49 88z" fill="url(#tea)" stroke="#d38b2a" stroke-width="5"/>
+                <ellipse cx="111" cy="94" rx="59" ry="16" fill="#ffe8b7" opacity=".6"/>
+                <g fill="#ffdc73" opacity=".78">
+                  <circle cx="86" cy="135" r="11"/><circle cx="122" cy="154" r="9"/><circle cx="145" cy="126" r="8"/>
+                  <circle cx="74" cy="190" r="8"/><circle cx="133" cy="215" r="11"/><circle cx="100" cy="245" r="7"/>
+                </g>
+                <g fill="#fff" opacity=".65">
+                  <rect x="79" y="165" width="15" height="15" rx="3"/><rect x="115" y="185" width="16" height="16" rx="3"/>
+                  <rect x="133" y="232" width="13" height="13" rx="3"/>
+                </g>
+                <g fill="#fff">
+                  <rect x="71" y="252" width="15" height="37" rx="3"/>
+                  <rect x="99" y="252" width="15" height="37" rx="3"/>
+                  <rect x="128" y="252" width="15" height="37" rx="3"/>
+                  <text x="111" y="307" text-anchor="middle" font-size="22" font-family="Arial" font-weight="900">DRINK</text>
+                </g>
+              </svg>
+            </div>
+            <ul class="summary-list">
+              <li><span class="icon">🥤</span><span id="summaryCount" class="zhpy" data-pinyin="yì bēi, dà bēi, 40 yuán">1 杯，大杯，40 元</span></li>
+              <li><span class="icon">🫖</span><span id="summaryDrink" class="zhpy" data-pinyin="hóng chá">紅茶</span></li>
+              <li><span class="icon">🧊</span><span id="summarySugar" class="zhpy" data-pinyin="bàn táng">半糖</span></li>
+              <li><span class="icon">❄️</span><span id="summaryIce" class="zhpy" data-pinyin="shǎo bīng">少冰</span></li>
+              <li><span class="icon">🟤</span><span id="summaryTopping" class="zhpy" data-pinyin="jiā zhēn zhū">加珍珠</span></li>
+              <li><span class="icon">🛍️</span><span id="summaryBag" class="zhpy" data-pinyin="bú yòng, xiè xie">不用，謝謝</span></li>
+              <li><span class="icon">📱</span><span id="summaryMember" class="zhpy" data-pinyin="dōu bú yòng">都不用</span></li>
+            </ul>
+          </div>
+          <button class="confirm" id="confirmBtn"><span class="zhpy" data-pinyin="què rèn diǎn cān">✅ 確認點餐</span></button>
+        </section>
+
+      </aside>
+    </main>
+
+
+    <p class="note zhpy" data-pinyin="jiào xué yòng mó nǐ bǎn: cǐ wǎng yè yòng yú huá yǔ kǒu shuō liàn xí, cài dān yǔ shì jué jǐn cān kǎo tái wān shǒu yáo yǐn wén huà, bù shǐ yòng guān fāng shāng biāo huò guān fāng sù cái.">教學用模擬版：此網頁用於華語口說練習，菜單與視覺僅參考台灣手搖飲文化，不使用官方商標或官方素材。</p>
+    <p class="note zhpy" data-pinyin="bǎn quán suǒ yǒu: chén jiā lín. běn wǎng zhàn wèi huá yǔ jiào xué yǔ kǒu yǔ liàn xí yòng tú, jǐn gōng jiào xué cān kǎo shǐ yòng. bù fèn chéng shì yǔ bǎn miàn zhì zuò shǐ yòng AI gōng jù fǔ zhù wán chéng.">© 2026 陳佳琳 Chen, Jia-Lin. 本網站為華語教學與口語練習用途，僅供教學參考使用。部分程式與版面製作使用 AI 工具輔助完成。</p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="completeModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-stars">⭐⭐⭐</div>
+      <h2>完成點餐</h2>
+      <p>太棒了！你已經完成三個點餐關卡，現在可以再玩一次，或直接關閉這個畫面。</p>
+      <div class="modal-actions">
+        <button class="modal-close" id="closeModalBtn">關閉</button>
+        <button class="modal-restart" id="restartBtn">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const pinyinMap = {
+      "紅茶": "hóng chá",
+      "青茶": "qīng chá",
+      "烏龍茶": "wū lóng chá",
+      "金萱": "jīn xuān",
+      "冬瓜茶": "dōng guā chá",
+      "冬瓜青": "dōng guā qīng",
+      "檸檬紅茶": "níng méng hóng chá",
+      "柳橙綠茶": "liǔ chéng lǜ chá",
+      "百香綠茶": "bǎi xiāng lǜ chá",
+      "芒果綠茶": "máng guǒ lǜ chá",
+      "紅茶拿鐵": "hóng chá ná tiě",
+      "青茶拿鐵": "qīng chá ná tiě",
+      "烏龍拿鐵": "wū lóng ná tiě",
+      "紅茶珍珠拿鐵": "hóng chá zhēn zhū ná tiě",
+      "中杯": "zhōng bēi",
+      "大杯": "dà bēi",
+      "瓶": "píng",
+      "瓶裝": "píng zhuāng",
+      "全糖": "quán táng",
+      "半糖": "bàn táng",
+      "微糖": "wéi táng",
+      "無糖": "wú táng",
+      "正常冰": "zhèng cháng bīng",
+      "少冰": "shǎo bīng",
+      "微冰": "wéi bīng",
+      "去冰": "qù bīng",
+      "熱": "rè",
+      "加珍珠": "jiā zhēn zhū",
+      "加椰果": "jiā yé guǒ",
+      "加寒天": "jiā hán tiān",
+      "X": "X",
+      "不用加料": "bú yòng jiā liào",
+      "杯型": "bēi xíng",
+      "甜度": "tián dù",
+      "冰塊": "bīng kuài",
+      "加料": "jiā liào",
+      "袋子": "dài zi",
+      "會員／載具": "huì yuán / zài jù",
+      "第 1 關：基本點餐": "dì yī guān: jī běn diǎn cān",
+      "第 2 關：甜度練習": "dì èr guān: tián dù liàn xí",
+      "第 3 關：冰塊練習": "dì sān guān: bīng kuài liàn xí",
+      "第 4 關：加料練習": "dì sì guān: jiā liào liàn xí",
+      "第 5 關：確認結帳": "dì wǔ guān: què rèn jié zhàng",
+      "錄音回答": "lù yīn huí dá",
+      "錄音中……": "lù yīn zhōng...",
+      "好": "hǎo",
+      "不用，謝謝": "bú yòng, xiè xie",
+      "我有載具": "wǒ yǒu zài jù",
+      "我有會員": "wǒ yǒu huì yuán",
+      "都不用": "dōu bú yòng",
+      "都要": "dōu yào",
+      "按下錄音，說出你的完整答案。": "àn xià lù yīn, shuō chū nǐ de wán zhěng dá àn.",
+      "請說：我要一杯……": "qǐng shuō: wǒ yào yì bēi...",
+      "你說的是：": "nǐ shuō de shì:",
+      "此瀏覽器不支援語音辨識；仍可使用喇叭播放與點選練習。": "cǐ liú lǎn qì bù zhī yuán yǔ yīn biàn shí; réng kě yǐ shǐ yòng lǎ ba bō fàng yǔ diǎn xuǎn liàn xí."
+};
+
+    const enMap = {
+      "紅茶": "Black Tea",
+      "青茶": "Light Oolong Tea",
+      "烏龍茶": "Oolong Tea",
+      "金萱": "Jin Xuan Tea",
+      "冬瓜茶": "Winter Melon Tea",
+      "冬瓜青": "Winter Melon Light Oolong Tea",
+      "檸檬紅茶": "Lemon Black Tea",
+      "柳橙綠茶": "Orange Green Tea",
+      "百香綠茶": "Passion Fruit Green Tea",
+      "芒果綠茶": "Mango Green Tea",
+      "紅茶拿鐵": "Black Milk Tea",
+      "青茶拿鐵": "Light Oolong Milk Tea",
+      "烏龍拿鐵": "Oolong Milk Tea",
+      "紅茶珍珠拿鐵": "Black Pearl Milk Tea",
+      "中杯": "medium",
+      "大杯": "large",
+      "瓶": "bottle",
+      "瓶裝": "bottled drink",
+      "全糖": "full sugar",
+      "半糖": "half sugar",
+      "微糖": "light sugar",
+      "無糖": "no sugar",
+      "正常冰": "regular ice",
+      "少冰": "less ice",
+      "微冰": "light ice",
+      "去冰": "no ice",
+      "熱": "hot",
+      "加珍珠": "add pearls",
+      "加椰果": "add coconut jelly",
+      "加寒天": "add agar jelly",
+      "X": "No topping",
+      "不用加料": "no toppings",
+      "杯型": "cup size",
+      "甜度": "sweetness",
+      "冰塊": "ice",
+      "加料": "toppings",
+      "袋子": "bag",
+      "會員／載具": "membership / receipt carrier",
+      "第 1 關：基本點餐": "Level 1: Basic Ordering",
+      "第 2 關：甜度練習": "Level 2: Sweetness Practice",
+      "第 3 關：冰塊練習": "Level 3: Ice Level Practice",
+      "第 4 關：加料練習": "Level 4: Toppings Practice",
+      "第 5 關：確認結帳": "Level 5: Order Confirmation",
+      "錄音回答": "Record Response",
+      "錄音中……": "Recording...",
+      "好": "Yes, please.",
+      "不用，謝謝": "No, thank you.",
+      "我有載具": "I have a receipt carrier.",
+      "我有會員": "I have a membership.",
+      "都不用": "Neither.",
+      "都要": "Both.",
+      "按下錄音，說出你的完整答案。": "Press record and say your full answer.",
+      "請說：我要一杯……": "Please say: I'd like one...",
+      "此瀏覽器不支援語音辨識；仍可使用喇叭播放與點選練習。": "This browser does not support speech recognition. You can still use audio playback and click-to-practice.",
+      "很棒！你說出了完整點餐句。": "Great! You said a complete ordering sentence.",
+      "不錯！再補充甜度、冰塊或加料會更完整。": "Nice! Add sweetness, ice, or toppings to make it more complete.",
+      "再試一次：先說「我要一杯」，再說飲料、甜度、冰塊和加料。": "Try again: first say 'I'd like one...', then add the drink, sweetness, ice, and toppings."
+};
+
+    function py(text){
+      return pinyinMap[text] || text;
+    }
+
+    function en(text){
+      return enMap[text] || text;
+    }
+
+    function setZhPy(target, text, pinyinText, englishText){
+      const el = typeof target === 'string' ? $(target) : target;
+      if(!el) return;
+      el.textContent = text;
+      el.dataset.pinyin = pinyinText || py(text);
+      el.dataset.en = englishText || en(text);
+    }
+
+    function sentencePinyin(drink, sugar, ice, topping){
+      return `wǒ yào yì bēi ${py(drink)}, ${py(sugar)}, ${py(ice)}, ${py(normalizeTopping(topping))}.`;
+    }
+
+    function sentenceEnglish(drink, sugar, ice, topping){
+      return `I'd like one ${en(drink)}, ${en(sugar)}, ${en(ice)}, ${en(normalizeTopping(topping))}.`;
+    }
+
+    function studentSentenceEnglish(drink){
+      return `I'd like one ${en(drink)}.`;
+    }
+
+    function phrase4Pinyin(topping){
+      return topping === "不用加料" ? "bú yòng jiā liào." : `qǐng bāng wǒ ${py(topping)}.`;
+    }
+
+    function phrase4English(topping){
+      return topping === "不用加料" ? "No toppings." : `Please ${en(topping)}.`;
+    }
+
+    function hydrateStaticEnglish(){
+      const set = (selector, value) => {
+        const el = document.querySelector(selector);
+        if(el) el.dataset.en = value;
+      };
+      set('.brand strong.zhpy', 'Teaching Demo Shop');
+      set('.brand span.zhpy', 'Taiwanese Drink Ordering Speaking Practice');
+      set('.title p.zhpy', 'Listen, speak, and order a drink you like!');
+      set('#progressTitle', `Level ${state.level} / 3`);
+      set('.progress-label.zhpy', 'Progress');
+      set('#step1 .zhpy', 'Drink Menu');
+      set('#step2 .zhpy', 'Dialogue Practice');
+      set('#step3 .zhpy', 'Your Drink');
+      set('.menu .panel-head .zhpy', 'Level 1 | Drink Menu');
+      set('.dialogue .panel-head > span > .zhpy', 'Level 2 | Dialogue Practice');
+      set('.dialogue .hint-small.zhpy', 'Speak Chinese and complete the order!');
+      set('.drink-card .panel-head .zhpy', 'Level 3 | Your Drink');
+      set('#confirmBtn .zhpy', 'Confirm Order');
+      set('#menuTaskText', 'Please choose a drink.');
+      set('#dialogueTaskText', 'Please complete sweetness, ice, toppings, bag, and membership/carrier.');
+      set('#summaryTaskText', 'Please check the order and press Confirm Order.');
+      set('.phrase-title.zhpy', 'Useful Ordering Patterns');
+      const notes = document.querySelectorAll('.note.zhpy');
+      if(notes[0]) notes[0].dataset.en = 'Teaching demo version: This page is for Chinese speaking practice. The menu and visuals are inspired by Taiwan drink culture and do not use official trademarks or official assets.';
+      if(notes[1]) notes[1].dataset.en = '© 2026 Chen, Jia-Lin. This website is for Chinese teaching and speaking practice, and is provided for educational reference only. Some code and layout work was completed with assistance from AI tools.';
+      set('#clerkQuestion1', 'Hello, what would you like to drink?');
+      set('#clerkQuestion2', 'Sweetness and ice level?');
+      set('#clerkBagQuestion', 'Do you need to buy a bag?');
+      set('#clerkMemberQuestion', 'Do you have a membership or receipt carrier?');
+      set('#recordBtnLabel', 'Record Response');
+      set('#recordMsg', 'Press record and say your full answer.');
+      const categories = ['Original Tea', 'Fresh Fruit Drinks', 'Milk Tea Series'];
+      document.querySelectorAll('.cat-title .zhpy').forEach((el, i) => el.dataset.en = categories[i] || 'Category');
+      document.querySelectorAll('[data-drink]').forEach(el => el.dataset.en = en(el.dataset.drink));
+      document.querySelectorAll('.choice').forEach(el => el.dataset.en = en(el.dataset.value));
+    }
+
+    const levels = [
+      { level:1, title:"第 1 關｜飲品 MENU", focus:"請從菜單選擇飲品。", areaId:"menuPanel" },
+      { level:2, title:"第 2 關｜模擬對話", focus:"請完成甜度、冰塊、加料、袋子與會員／載具。", areaId:"dialoguePanel" },
+      { level:3, title:"第 3 關｜你的飲料", focus:"請確認訂單內容並完成點餐。", areaId:"summaryPanel" }
+    ];
+
+        const drinkCatalog = [
+      {name:"紅茶", priceM:40, priceL:40, priceB:65},
+      {name:"青茶", priceM:40, priceL:40, priceB:65},
+      {name:"烏龍茶", priceM:45, priceL:45, priceB:70},
+      {name:"金萱", priceM:45, priceL:45, priceB:70},
+      {name:"冬瓜茶", priceM:45, priceL:45, priceB:70},
+      {name:"冬瓜青", priceM:50, priceL:50, priceB:75},
+      {name:"檸檬紅茶", priceM:55, priceL:55, priceB:85},
+      {name:"柳橙綠茶", priceM:65, priceL:65, priceB:95},
+      {name:"百香綠茶", priceM:60, priceL:60, priceB:90},
+      {name:"芒果綠茶", priceM:70, priceL:70, priceB:105},
+      {name:"紅茶拿鐵", priceM:70, priceL:70, priceB:95},
+      {name:"青茶拿鐵", priceM:70, priceL:70, priceB:95},
+      {name:"烏龍拿鐵", priceM:75, priceL:75, priceB:100},
+      {name:"紅茶珍珠拿鐵", priceM:75, priceL:75, priceB:100}
+    ];
+    const sizeOptions = ["大杯","瓶裝"];
+    const sugarOptions = ["全糖","半糖","微糖","無糖"];
+    const iceOptions = ["正常冰","少冰","微冰","去冰","熱"];
+    const toppingOptions = ["加珍珠","加椰果","加寒天","X"];
+    const bagOptions = ["好","不用，謝謝"];
+    const memberOptions = ["我有載具","我有會員","都不用","都要"];
+
+    function pick(list){
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function updatePrice(){
+      state.price = state.size === "瓶裝" ? state.priceB : (state.size === "大杯" ? state.priceL : state.priceM);
+    }
+
+    const dialogueOrder = ["size","sugar","ice","topping","bag","member"];
+    const dialogueLabels = {
+      size:"杯型",
+      sugar:"甜度",
+      ice:"冰塊",
+      topping:"加料",
+      bag:"袋子",
+      member:"會員／載具"
+    };
+
+    function getDialogueTarget(group){
+      const targetMap = {
+        size: state.targetSize,
+        sugar: state.targetSugar,
+        ice: state.targetIce,
+        topping: state.targetTopping,
+        bag: state.targetBag,
+        member: state.targetMember
+      };
+      return targetMap[group];
+    }
+
+    function getDialogueDisplay(group, value){
+      if(group === "topping" && value === "X") return "X";
+      return value;
+    }
+
+    function getDialogueSpeak(group, value){
+      if(group === "topping" && value === "X") return "不加料";
+      return value;
+    }
+
+    function resetDialogueChoices(){
+      state.size = "";
+      state.sugar = "";
+      state.ice = "";
+      state.topping = "";
+      state.bag = "";
+      state.member = "";
+      state.dialogueStep = 0;
+      state.dialogueIntroDone = false;
+      updatePrice();
+    }
+
+    function buildTargetParts(data){
+      const size = data.size || data.targetSize;
+      const parts = [displaySizeLabel(size), data.drink, data.sugar, data.ice];
+      if(data.topping && data.topping !== "X") parts.push(data.topping);
+      if(data.bag) parts.push(data.bag);
+      if(data.member) parts.push(data.member);
+      return parts;
+    }
+
+    function randomizeDrink(){
+      const drinkItem = pick(drinkCatalog);
+      state.targetDrink = drinkItem.name;
+      state.targetPriceM = drinkItem.priceM;
+      state.targetPriceL = drinkItem.priceL;
+      state.targetPriceB = drinkItem.priceB;
+    }
+
+    function randomizeDialogue(){
+      state.targetSize = pick(sizeOptions);
+      state.targetSugar = pick(sugarOptions);
+      state.targetIce = pick(iceOptions);
+      state.targetTopping = pick(toppingOptions);
+      state.targetBag = pick(bagOptions);
+      state.targetMember = pick(memberOptions);
+      resetDialogueChoices();
+    }
+
+    function guideToCurrentStep(){
+      if(state.level === 1){
+        focusSection("menuPanel");
+        return;
+      }
+      if(state.level === 2){
+        if(!state.dialogueIntroDone){
+          updateTaskPanel();
+          focusSection("clerkDrinkRow");
+          return;
+        }
+
+        const currentGroup = dialogueOrder[state.dialogueStep];
+        const focusMap = {
+          size:"sizeGroup",
+          sugar:"sugarGroup",
+          ice:"iceGroup",
+          topping:"toppingGroup",
+          bag:"bagOptionsRow",
+          member:"memberOptionsRow"
+        };
+        if(currentGroup){
+          updateTaskPanel();
+          focusSection(focusMap[currentGroup] || `${currentGroup}Group`);
+          return;
+        }
+        focusSection("dialoguePanel");
+        return;
+      }
+      if(state.level === 3){
+        focusSection("confirmBtn");
+      }
+    }
+
+    function focusAndSpeak(id, text, delay=0){
+      window.__dialogueGuideTimer = setTimeout(()=>{
+        focusSection(id);
+        if(text) speak(text);
+      }, delay);
+    }
+
+    function startDialogueIntroSequence(){
+      clearTimeout(window.__dialogueGuideTimer);
+      state.dialogueIntroDone = false;
+      updateUI();
+
+      focusAndSpeak("clerkDrinkRow", "您好，請問要喝什麼？", 400);
+      focusAndSpeak("studentDrinkRow", orderDrinkPhrase(), 3200);
+      focusAndSpeak("clerkSugarIceRow", "請問，甜度冰塊？", 6000);
+
+      window.__dialogueGuideTimer = setTimeout(()=>{
+        state.dialogueIntroDone = true;
+        updateUI();
+        guideToCurrentStep();
+        toast("請依序選擇杯型、甜度、冰塊、加料、袋子、會員／載具。");
+      }, 8400);
+    }
+
+    function showClerkQuestionThenOptions(group){
+      const questionMap = {
+        bag: {row:"clerkBagRow", text:"需要買袋子嗎？"},
+        member: {row:"clerkMemberRow", text:"會員載具有嗎？"}
+      };
+      const q = questionMap[group];
+      if(!q){
+        guideToCurrentStep();
+        return;
+      }
+      focusSection(q.row);
+      speak(q.text);
+      setTimeout(()=>guideToCurrentStep(), 2500);
+    }
+
+    const state = {
+      drink: "紅茶",
+      sugar: "半糖",
+      ice: "少冰",
+      topping: "加珍珠",
+      bag: "不用，謝謝",
+      member: "都不用",
+      size: "大杯",
+      priceM: 40,
+      priceL: 40,
+      price: 40,
+      score: 0,
+      level: 1,
+      targetDrink: "紅茶",
+      targetPriceM: 40,
+      targetPriceL: 40,
+      targetPriceB: 65,
+      targetSize: "大杯",
+      targetSugar: "半糖",
+      targetIce: "少冰",
+      targetTopping: "加珍珠",
+      targetBag: "不用，謝謝",
+      targetMember: "都不用",
+      dialogueStep: 0,
+      dialogueIntroDone: false
+    };
+
+    const completedLevels = new Set();
+    let focusedElement = null;
+    let dialogueTouched = new Set();
+
+    const $ = (id) => document.getElementById(id);
+
+    function toast(text){
+      const t = $("toast");
+      t.textContent = text;
+      t.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
+    }
+
+    function hasTopping(topping){
+      return Boolean(topping) && topping !== "X";
+    }
+
+    function normalizeTopping(topping){
+      return hasTopping(topping) ? topping : "—";
+    }
+
+    function measureWord(){
+      return state.size === "瓶裝" ? "瓶" : "杯";
+    }
+
+    function measurePinyin(){
+      return state.size === "瓶裝" ? "yì píng" : "yì bēi";
+    }
+
+    function measureEnglish(){
+      return state.size === "瓶裝" ? "1 bottle" : "1 cup";
+    }
+
+    function orderDrinkPhrase(){
+      return state.size === "瓶裝" ? `我要一瓶${state.drink}。` : `我要一杯${state.drink}。`;
+    }
+
+    function orderDrinkPinyin(){
+      return state.size === "瓶裝" ? `wǒ yào yì píng ${py(state.drink)}.` : `wǒ yào yì bēi ${py(state.drink)}.`;
+    }
+
+    function orderDrinkEnglish(){
+      return state.size === "瓶裝" ? `I'd like one bottle of ${en(state.drink)}.` : `I'd like one ${en(state.drink)}.`;
+    }
+
+    function summaryQuantityText(sizeText, priceText){
+      if(sizeText === "瓶裝") return `1 瓶，${priceText} 元`;
+      return `1 杯，大杯，${priceText} 元`;
+    }
+
+    function summaryQuantityPinyin(sizeText, priceText){
+      if(sizeText === "瓶裝") return `yì píng, ${priceText} yuán`;
+      return `yì bēi, dà bēi, ${priceText} yuán`;
+    }
+
+    function summaryQuantityEnglish(sizeText, priceText){
+      if(sizeText === "瓶裝") return `1 bottle, ${priceText} NTD`;
+      return `1 large cup, ${priceText} NTD`;
+    }
+
+    function displaySizeLabel(size){
+      return size === "瓶裝" ? "瓶裝" : "大杯";
+    }
+
+    function displaySizePinyin(size){
+      return size === "瓶裝" ? "píng zhuāng" : "dà bēi";
+    }
+
+    function displaySizeEnglish(size){
+      return size === "瓶裝" ? "bottled drink" : "large cup";
+    }
+
+    function orderNameForDisplay(){
+      return `${displaySizeLabel(state.size)} ${state.drink}`;
+    }
+
+    function orderNamePinyin(){
+      return `${displaySizePinyin(state.size)} ${py(state.drink)}`;
+    }
+
+    function orderNameEnglish(){
+      return `${displaySizeEnglish(state.size)} ${en(state.drink)}`;
+    }
+
+    function syncChoiceButtons(){
+      document.querySelectorAll('.choice-group').forEach(group => {
+        const key = group.dataset.group;
+        group.querySelectorAll('.choice').forEach(btn => {
+          btn.classList.toggle('selected', btn.dataset.value === state[key]);
+        });
+      });
+      for(let i=1;i<=3;i++){
+        const step = $(`step${i}`);
+        if(step){
+          step.classList.toggle('active', state.level === i);
+          step.classList.toggle('done', completedLevels.has(i));
+        }
+      }
+    }
+
+    function updateTaskPanel(){
+      setZhPy("menuTaskText", "任務提示：請先選擇一種飲品。", "rèn wù tí shì: qǐng xiān xuǎn zé yì zhǒng yǐn pǐn.", "Task: Please choose a drink.");
+      const currentGroup = dialogueOrder[state.dialogueStep];
+
+      if(state.level === 2 && !state.dialogueIntroDone){
+        setZhPy("dialogueTaskText", "任務提示：先聽店員問「您好，請問要喝什麼？」", "rèn wù tí shì: xiān tīng diàn yuán wèn: nín hǎo, qǐng wèn yào hē shén me?", "Task: First listen to the clerk ask what you would like to drink.");
+      }else if(currentGroup){
+        setZhPy("dialogueTaskText", `任務提示：請選擇${dialogueLabels[currentGroup]}。`, `rèn wù tí shì: qǐng xuǎn zé ${py(dialogueLabels[currentGroup])}.`, `Task: Choose ${en(dialogueLabels[currentGroup])}.`);
+      }else{
+        setZhPy("dialogueTaskText", "任務提示：請完成所有對話項目。", "rèn wù tí shì: qǐng wán chéng suǒ yǒu duì huà xiàng mù.", "Task: Finish all dialogue items.");
+      }
+
+      setZhPy("summaryTaskText", "確認餐點：請檢查飲料內容，完成後按下「確認點餐」。", "què rèn cān diǎn: qǐng jiǎn chá yǐn liào nèi róng, wán chéng hòu àn xià què rèn diǎn cān.", "Confirm order: Check the drink details, then press Confirm Order.");
+      document.querySelectorAll('#menuTaskBox,#dialogueTaskBox,#summaryTaskBox').forEach(el => el.classList.remove('active-level-task'));
+      document.querySelectorAll('.choice-group').forEach(el => el.classList.remove('current-step'));
+      const activeMap = {1:'menuTaskBox',2:'dialogueTaskBox',3:'summaryTaskBox'};
+      const activeEl = document.getElementById(activeMap[state.level]);
+      if(activeEl) activeEl.classList.add('active-level-task');
+      if(state.level === 2 && state.dialogueIntroDone && currentGroup){
+        const currentEl = document.getElementById(`${currentGroup}Group`);
+        if(currentEl) currentEl.classList.add('current-step');
+      }
+    }
+
+    function updateUI(){
+      const safe = (value) => value || "—";
+      const safePy = (value) => value ? py(value) : "—";
+      const safeEn = (value) => value ? en(value) : "—";
+
+      setZhPy("studentDrinkSentence", orderDrinkPhrase(), orderDrinkPinyin(), orderDrinkEnglish());
+      setZhPy("summaryDrink", state.drink, py(state.drink), en(state.drink));
+      setZhPy("summarySugar", safe(state.sugar), safePy(state.sugar), safeEn(state.sugar));
+      setZhPy("summaryIce", safe(state.ice), safePy(state.ice), safeEn(state.ice));
+      setZhPy("summaryTopping", state.topping ? normalizeTopping(state.topping) : "—", state.topping ? (hasTopping(state.topping) ? py(state.topping) : "—") : "—", state.topping ? (hasTopping(state.topping) ? en(state.topping) : "No topping") : "—");
+      setZhPy("summaryBag", state.bag === "好" ? "買一個袋子" : safe(state.bag), state.bag === "好" ? "mǎi yí ge dài zi" : safePy(state.bag), state.bag === "好" ? "buy a bag" : safeEn(state.bag));
+      setZhPy("summaryMember", safe(state.member), safePy(state.member), safeEn(state.member));
+      const sizeText = state.size || "—";
+      const priceText = state.size ? `${state.price}` : "—";
+      setZhPy("summaryCount", summaryQuantityText(sizeText, priceText), summaryQuantityPinyin(sizeText, priceText), summaryQuantityEnglish(sizeText, priceText));
+      updateTaskPanel();
+      $("progressTitle").dataset.pinyin = `dì ${state.level} guān / gòng sān guān`;
+      $("progressTitle").dataset.en = `Level ${state.level} / 3`;
+      document.querySelector('[data-say-target="studentDrinkSentence"]').dataset.say = orderDrinkPhrase();
+      document.querySelector(".phrase-card.p1 .mini-speak").dataset.say = orderDrinkPhrase();
+      setZhPy("phrase1Text", state.size === "瓶裝" ? `我要一瓶……` : `我要一杯……`, state.size === "瓶裝" ? `wǒ yào yì píng...` : `wǒ yào yì bēi...`, state.size === "瓶裝" ? `I'd like one bottle of...` : `I'd like one...`);
+      setZhPy("phrase2Text", "甜度要……", "tián dù yào...", "Sweetness should be...");
+      document.querySelector(".phrase-card.p2 .mini-speak").dataset.say = "甜度要";
+      setZhPy("phrase3Text", "冰塊要……", "bīng kuài yào...", "Ice should be...");
+      document.querySelector(".phrase-card.p3 .mini-speak").dataset.say = "冰塊要";
+      setZhPy("phrase4Text", `我要買一個袋子。`, `wǒ yào mǎi yí ge dài zi.`, `I'd like to buy a bag.`);
+      document.querySelector(".phrase-card.p4 .mini-speak").dataset.say = `我要買一個袋子。`;
+      $("score").textContent = state.score;
+      $("level").textContent = state.level;
+      $("progressBar").style.width = `${Math.min(100, state.score/3*100)}%`;
+      for(let i=1;i<=3;i++){
+        const star = $(`star${i}`);
+        if(star) star.classList.toggle("empty", state.score < i);
+      }
+      syncChoiceButtons();
+    }
+
+    function focusSection(id){
+      const el = $(id);
+      if(!el) return;
+      if(focusedElement) focusedElement.classList.remove('focus-target');
+      focusedElement = el;
+      el.classList.add('focus-target');
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    function loadLevel(levelNumber, shouldSpeak=false){
+      const meta = levels[levelNumber - 1];
+      if(!meta) return;
+      state.level = meta.level;
+      if(levelNumber === 1){
+        randomizeDrink();
+      }else if(levelNumber === 2){
+        randomizeDialogue();
+      }
+      updateUI();
+      toast(`${meta.title}：${meta.focus}`);
+
+      if(levelNumber === 2){
+        focusSection("dialoguePanel");
+        startDialogueIntroSequence();
+        return;
+      }
+
+      guideToCurrentStep();
+      if(shouldSpeak){
+        if(levelNumber === 1){
+          speak("飲品名稱");
+        }else{
+          speak("確認點餐");
+        }
+      }
+    }
+
+    function transformSpeechText(text){
+      const rawSentence = text || "";
+      return rawSentence
+        .replaceAll("我有載具", "wó 有載具")
+        .replaceAll("我有會員", "wó 有會員")
+        .replaceAll("無糖", "wú 糖")
+        .replaceAll("加椰果", "加爺果")
+        .replaceAll("椰果", "爺果");
+    }
+
+    function speak(text){
+      if(!("speechSynthesis" in window)){
+        toast("這個瀏覽器不支援語音播放。");
+        return;
+      }
+      const rawSentence = text || "";
+      const utter = new SpeechSynthesisUtterance(transformSpeechText(rawSentence));
+      utter.lang = "zh-TW";
+      utter.rate = rawSentence.includes("我有") ? 0.75 : 0.85;
+      utter.pitch = 1.08;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    function completeLevel(levelNumber){
+      if(completedLevels.has(levelNumber)){
+        toast(`第 ${levelNumber} 關已經完成了。進度：${completedLevels.size}/3`);
+        if(levelNumber < 3){
+          clearTimeout(window.__nextLevelTimer);
+          window.__nextLevelTimer = setTimeout(()=>loadLevel(levelNumber + 1, true), 1500);
+        }
+        return;
+      }
+      completedLevels.add(levelNumber);
+      state.score = completedLevels.size;
+      updateUI();
+      toast(`第 ${levelNumber} 關完成！進度：${completedLevels.size}/3`);
+      if(levelNumber < 3){
+        clearTimeout(window.__nextLevelTimer);
+        window.__nextLevelTimer = setTimeout(()=>loadLevel(levelNumber + 1, true), 1500);
+      }
+    }
+
+    function checkDialogueProgress(group){
+      if(state.level !== 2) return;
+
+      const currentGroup = dialogueOrder[state.dialogueStep];
+      if(group !== currentGroup){
+        toast(`請先選擇${dialogueLabels[currentGroup]}。`);
+        guideToCurrentStep();
+        return;
+      }
+
+      const spokenValue = getDialogueSpeak(group, state[group]);
+      speak(spokenValue);
+      state.dialogueStep += 1;
+      updateUI();
+
+      if(state.dialogueStep >= dialogueOrder.length){
+        completeLevel(2);
+        return;
+      }
+
+      const nextGroup = dialogueOrder[state.dialogueStep];
+      toast(`已完成${dialogueLabels[group]}，下一步：${dialogueLabels[nextGroup]}。`);
+      if(nextGroup === "bag" || nextGroup === "member"){
+        setTimeout(()=>showClerkQuestionThenOptions(nextGroup), 1100);
+      }else{
+        setTimeout(()=>guideToCurrentStep(), 1100);
+      }
+    }
+
+    function showCompleteModal(){
+      $("completeModal").classList.add("show");
+      $("completeModal").setAttribute("aria-hidden", "false");
+    }
+
+    function hideCompleteModal(){
+      $("completeModal").classList.remove("show");
+      $("completeModal").setAttribute("aria-hidden", "true");
+    }
+
+    function resetGame(){
+      completedLevels.clear();
+      state.score = 0;
+      hideCompleteModal();
+      if(isRecording){
+        stopRecordingSession(true);
+      }else{
+        resetPlayback();
+      }
+      setZhPy("recordBtnLabel", "🎙️ 錄音回答", "lù yīn huí dá", "Record Response");
+      setZhPy("recordMsg", "按下錄音，說出你的完整答案。", "àn xià lù yīn, shuō chū nǐ de wán zhěng dá àn.", "Press record and say your full answer.");
+      loadLevel(1, true);
+    }
+
+    document.addEventListener("click", (e)=>{
+      const levelBtn = e.target.closest("[data-level-jump]");
+      if(levelBtn){
+        loadLevel(Number(levelBtn.dataset.levelJump), true);
+        return;
+      }
+
+      const speaker = e.target.closest("[data-say], [data-say-target]");
+      if(speaker){
+        const target = speaker.dataset.sayTarget;
+        const text = target ? $(target).textContent : speaker.dataset.say;
+        speak(text);
+        return;
+      }
+
+      const drinkBtn = e.target.closest("[data-drink]");
+      if(drinkBtn){
+        const chosenDrink = drinkBtn.dataset.drink;
+        state.drink = chosenDrink;
+        state.priceM = Number(drinkBtn.dataset.priceM || state.targetPriceM || 0);
+        state.priceL = Number(drinkBtn.dataset.priceL || state.targetPriceL || state.priceM || 0);
+        state.priceB = Number(drinkBtn.dataset.priceB || state.targetPriceB || state.priceL || state.priceM || 0);
+        updatePrice();
+        updateUI();
+        speak(state.drink);
+        toast(`已選擇：${state.drink}`);
+        if(state.level === 1){
+          completeLevel(1);
+          clearTimeout(window.__nextLevelTimer);
+          window.__nextLevelTimer = setTimeout(()=>loadLevel(2, true), 1500);
+        }
+        return;
+      }
+
+      const choice = e.target.closest(".choice");
+      if(choice){
+        const groupEl = choice.closest(".choice-group");
+        if(!groupEl) return;
+        const group = groupEl.dataset.group;
+        const currentGroup = dialogueOrder[state.dialogueStep];
+
+        if(state.level === 2 && !state.dialogueIntroDone){
+          toast("請先聽完店員問話，再開始選擇。");
+          guideToCurrentStep();
+          return;
+        }
+
+        if(state.level === 2 && group !== currentGroup){
+          toast(`請先選擇${dialogueLabels[currentGroup]}。`);
+          guideToCurrentStep();
+          return;
+        }
+
+        state[group] = choice.dataset.value;
+        if(group === "size") updatePrice();
+        updateUI();
+        checkDialogueProgress(group);
+      }
+    });
+
+    function clearConfirmationHighlights(){
+      document.querySelectorAll(".confirm-highlight").forEach(el => el.classList.remove("confirm-highlight"));
+    }
+
+    function highlightSummaryItem(id){
+      clearConfirmationHighlights();
+      const el = $(id);
+      if(!el) return;
+      const target = el.closest("li") || el;
+      target.classList.add("confirm-highlight");
+      target.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+
+    function speakConfirmationSequence(items, onDone){
+      clearConfirmationHighlights();
+
+      if(!("speechSynthesis" in window)){
+        let index = 0;
+        const step = () => {
+          if(index >= items.length){
+            clearConfirmationHighlights();
+            onDone();
+            return;
+          }
+          const item = items[index++];
+          if(item.elId) highlightSummaryItem(item.elId);
+          setTimeout(step, 900);
+        };
+        step();
+        return;
+      }
+
+      speechSynthesis.cancel();
+      let index = 0;
+
+      const next = () => {
+        if(index >= items.length){
+          clearConfirmationHighlights();
+          onDone();
+          return;
+        }
+
+        const item = items[index++];
+        if(item.elId) highlightSummaryItem(item.elId);
+
+        const utter = new SpeechSynthesisUtterance(transformSpeechText(item.text));
+        utter.lang = "zh-TW";
+        utter.rate = item.text.includes("我有") ? 0.75 : 0.82;
+        utter.pitch = 1.08;
+        utter.onend = () => setTimeout(next, 260);
+        utter.onerror = () => setTimeout(next, 260);
+        speechSynthesis.speak(utter);
+      };
+
+      next();
+    }
+
+    function runConfirmOrderSequence(){
+      const finalIce = state.ice === "熱" ? "熱的" : state.ice;
+      const items = [
+        {text:"好的，跟您確認一下", elId:"summaryTaskBox"},
+        {text:state.size === "瓶裝" ? "一瓶" : "一杯大杯", elId:"summaryCount"},
+        {text:state.drink, elId:"summaryDrink"},
+        {text:state.sugar, elId:"summarySugar"},
+        {text:finalIce, elId:"summaryIce"}
+      ];
+
+      if(hasTopping(state.topping)){
+        items.push({text:state.topping, elId:"summaryTopping"});
+      }
+
+      if(state.bag === "好"){
+        items.push({text:"買一個袋子", elId:"summaryBag"});
+      }
+
+      items.push({text:`一共${state.price}元`, elId:"summaryCount"});
+
+      speakConfirmationSequence(items, ()=>{
+        completeLevel(3);
+        setTimeout(showCompleteModal, 700);
+      });
+    }
+
+    $("confirmBtn").addEventListener("click", ()=>{
+      if(state.level !== 3){
+        state.level = 3;
+        updateUI();
+      }
+      runConfirmOrderSequence();
+    });
+
+    $("closeModalBtn").addEventListener("click", hideCompleteModal);
+    $("restartBtn").addEventListener("click", resetGame);
+
+    let isRecording = false;
+    let mediaRecorder = null;
+    let mediaStream = null;
+    let recordedChunks = [];
+    let currentAudioUrl = null;
+    let discardRecordingOnStop = false;
+    let audioContext = null;
+    let sourceNode = null;
+    let processorNode = null;
+    let wavChunks = [];
+    let wavSampleRate = 44100;
+
+    function setRecordingUI(recording){
+      isRecording = recording;
+      $("recordBtn").classList.toggle("recording", recording);
+      $("recordBtn").setAttribute("aria-pressed", recording ? "true" : "false");
+
+      if(recording){
+        setZhPy("recordBtnLabel", "⏹️ 停止錄音", "tíng zhǐ lù yīn", "Stop recording");
+        setZhPy("recordMsg", "錄音中……說完以後，請按「停止錄音」。", "lù yīn zhōng... shuō wán yǐ hòu, qǐng àn tíng zhǐ lù yīn.", "Recording... When you finish speaking, press Stop recording.");
+      }else{
+        setZhPy("recordBtnLabel", "🎙️ 重新錄音", "chóng xīn lù yīn", "Record again");
+      }
+    }
+
+    function resetPlayback(){
+      const audio = $("recordingPlayback");
+      const playBtn = $("playRecordingBtn");
+
+      if(currentAudioUrl){
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+      }
+
+      if(audio){
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+        audio.classList.add("hidden");
+      }
+
+      if(playBtn){
+        playBtn.classList.add("hidden");
+      }
+
+      recordedChunks = [];
+      wavChunks = [];
+    }
+
+    function stopTracks(){
+      if(mediaStream){
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+    }
+
+    function finalizeRecording(blob, message=true){
+      if(!blob || blob.size === 0){
+        setZhPy("recordMsg", "沒有錄到聲音，請再錄一次。", "méi yǒu lù dào shēng yīn, qǐng zài lù yí cì.", "No audio was recorded. Please try again.");
+        return;
+      }
+
+      if(currentAudioUrl){
+        URL.revokeObjectURL(currentAudioUrl);
+      }
+
+      currentAudioUrl = URL.createObjectURL(blob);
+      const audio = $("recordingPlayback");
+      const playBtn = $("playRecordingBtn");
+
+      audio.src = currentAudioUrl;
+      audio.classList.remove("hidden");
+      playBtn.classList.remove("hidden");
+
+      if(message){
+        setZhPy("recordMsg", "錄音完成！可以按「聆聽自己的錄音」，也可以按「重新錄音」再錄一次。", "lù yīn wán chéng! kě yǐ àn líng tīng zì jǐ de lù yīn, yě kě yǐ àn chóng xīn lù yīn zài lù yí cì.", "Recording complete! You can listen to your recording, or press Record again.");
+      }
+    }
+
+    function createMediaRecorder(stream){
+      if(!window.MediaRecorder) return null;
+
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg;codecs=opus"
+      ];
+
+      for(const type of candidates){
+        try{
+          if(!MediaRecorder.isTypeSupported || MediaRecorder.isTypeSupported(type)){
+            return new MediaRecorder(stream, {mimeType:type});
+          }
+        }catch(error){}
+      }
+
+      try{
+        return new MediaRecorder(stream);
+      }catch(error){
+        return null;
+      }
+    }
+
+    function flattenFloat32(chunks){
+      const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      const result = new Float32Array(length);
+      let offset = 0;
+      chunks.forEach(chunk => {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      });
+      return result;
+    }
+
+    function encodeWav(samples, sampleRate){
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+
+      const writeString = (offset, string) => {
+        for(let i=0; i<string.length; i++){
+          view.setUint8(offset + i, string.charCodeAt(i));
+        }
+      };
+
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, "data");
+      view.setUint32(40, samples.length * 2, true);
+
+      let offset = 44;
+      for(let i=0; i<samples.length; i++, offset += 2){
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      }
+
+      return new Blob([view], {type:"audio/wav"});
+    }
+
+    function startWavRecorder(stream){
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if(!AudioContextClass){
+        throw new Error("No AudioContext support");
+      }
+
+      audioContext = new AudioContextClass();
+      wavSampleRate = audioContext.sampleRate;
+      wavChunks = [];
+
+      sourceNode = audioContext.createMediaStreamSource(stream);
+      processorNode = audioContext.createScriptProcessor(4096, 1, 1);
+
+      processorNode.onaudioprocess = (event) => {
+        if(!isRecording) return;
+        const input = event.inputBuffer.getChannelData(0);
+        wavChunks.push(new Float32Array(input));
+      };
+
+      sourceNode.connect(processorNode);
+      processorNode.connect(audioContext.destination);
+    }
+
+    function stopWavRecorder(discard=false){
+      try{
+        if(processorNode){
+          processorNode.disconnect();
+          processorNode.onaudioprocess = null;
+          processorNode = null;
+        }
+        if(sourceNode){
+          sourceNode.disconnect();
+          sourceNode = null;
+        }
+        if(audioContext){
+          audioContext.close();
+          audioContext = null;
+        }
+      }catch(error){}
+
+      stopTracks();
+      setRecordingUI(false);
+
+      if(discard){
+        resetPlayback();
+        return;
+      }
+
+      if(wavChunks.length){
+        finalizeRecording(encodeWav(flattenFloat32(wavChunks), wavSampleRate));
+      }else{
+        setZhPy("recordMsg", "沒有錄到聲音，請再錄一次。", "méi yǒu lù dào shēng yīn, qǐng zài lù yí cì.", "No audio was recorded. Please try again.");
+      }
+    }
+
+    async function startRecordingSession(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        toast("此瀏覽器不支援錄音，請確認使用 HTTPS 網址與支援麥克風的瀏覽器。");
+        setZhPy("recordMsg", "此瀏覽器不支援錄音，請改用 Chrome、Edge 或 Safari 最新版。", "cǐ liú lǎn qì bù zhī yuán lù yīn, qǐng gǎi yòng Chrome, Edge huò Safari zuì xīn bǎn.", "This browser does not support recording. Please use the latest Chrome, Edge, or Safari.");
+        return;
+      }
+
+      resetPlayback();
+      discardRecordingOnStop = false;
+
+      try{
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio:{
+            echoCancellation:true,
+            noiseSuppression:true,
+            autoGainControl:true
+          }
+        });
+
+        recordedChunks = [];
+        mediaRecorder = createMediaRecorder(mediaStream);
+
+        if(mediaRecorder){
+          mediaRecorder.ondataavailable = (event) => {
+            if(event.data && event.data.size > 0){
+              recordedChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onerror = () => {
+            toast("錄音發生錯誤，改用備用錄音方式。");
+          };
+
+          mediaRecorder.onstop = () => {
+            stopTracks();
+            setRecordingUI(false);
+
+            if(discardRecordingOnStop){
+              discardRecordingOnStop = false;
+              resetPlayback();
+              return;
+            }
+
+            if(recordedChunks.length){
+              const blob = new Blob(recordedChunks, {type: mediaRecorder.mimeType || "audio/webm"});
+              finalizeRecording(blob);
+            }else{
+              setZhPy("recordMsg", "沒有錄到聲音，請再錄一次。", "méi yǒu lù dào shēng yīn, qǐng zài lù yí cì.", "No audio was recorded. Please try again.");
+            }
+          };
+
+          mediaRecorder.start(250);
+        }else{
+          startWavRecorder(mediaStream);
+        }
+
+        setRecordingUI(true);
+      }catch(error){
+        setRecordingUI(false);
+        stopTracks();
+        toast("無法開始錄音，請確認已允許麥克風權限。");
+        setZhPy("recordMsg", "無法開始錄音，請確認已允許麥克風權限，並使用 HTTPS 網址。", "wú fǎ kāi shǐ lù yīn, qǐng què rèn yǐ yǔn xǔ mài kè fēng quán xiàn, bìng shǐ yòng HTTPS wǎng zhǐ.", "Could not start recording. Please allow microphone permission and use an HTTPS URL.");
+      }
+    }
+
+    function stopRecordingSession(discard=false){
+      discardRecordingOnStop = discard;
+
+      if(mediaRecorder && mediaRecorder.state !== "inactive"){
+        try{
+          mediaRecorder.requestData();
+        }catch(error){}
+        mediaRecorder.stop();
+        return;
+      }
+
+      if(audioContext || processorNode){
+        stopWavRecorder(discard);
+        return;
+      }
+
+      setRecordingUI(false);
+      stopTracks();
+      if(discard) resetPlayback();
+    }
+
+    $("recordBtn").addEventListener("click", ()=>{
+      if(isRecording){
+        stopRecordingSession(false);
+      }else{
+        startRecordingSession();
+      }
+    });
+
+    $("playRecordingBtn").addEventListener("click", ()=>{
+      const audio = $("recordingPlayback");
+      if(audio && audio.src){
+        audio.currentTime = 0;
+        audio.play().catch(()=>toast("無法播放錄音，請再錄一次。"));
+      }else{
+        toast("目前還沒有錄音檔，請先錄音。");
+      }
+    });
+
+    function clean(text){
+      return (text || "").replace(/\s/g,"").replace(/，|。|、|！|!|\?|？/g,"");
+    }
+
+    function checkAnswer(raw){
+      const text = clean(raw);
+      const hasDrink = text.includes(state.drink);
+      const hasSugar = text.includes(state.sugar);
+      const hasIce = text.includes(state.ice);
+      const toppingKey = hasTopping(state.topping) ? state.topping.replace("加","") : "";
+      const hasToppingText = hasTopping(state.topping) ? (text.includes(toppingKey) || text.includes(state.topping)) : true;
+
+      let points = 0;
+      if(hasDrink) points += 3;
+      if(hasSugar) points += 2;
+      if(hasIce) points += 2;
+      if(hasToppingText) points += 2;
+      if(text.includes("我要") && (text.includes("一杯") || text.includes("1杯"))) points += 1;
+
+      if(points >= 8){
+        toast("很棒！你說出了完整點餐句。");
+        speak("很棒！點餐成功。");
+      }else if(points >= 5){
+        toast("不錯！再補充甜度、冰塊或加料會更完整。");
+        speak("不錯，再說完整一點。");
+      }else{
+        toast("再試一次：先說「我要一杯」，再說飲料、甜度、冰塊和加料。");
+        speak("請再試一次。");
+      }
+      updateUI();
+    }
+
+
+    const pinyinToggle = $("pinyinToggle");
+    const englishToggle = $("englishToggle");
+    function applyPinyinPreference(show){
+      document.body.classList.toggle("hide-pinyin", !show);
+      pinyinToggle.textContent = `拼音：${show ? "開啟" : "隱藏"}`;
+      localStorage.setItem("drinkGameShowPinyin", show ? "1" : "0");
+    }
+    function applyEnglishPreference(show){
+      document.body.classList.toggle("hide-en", !show);
+      englishToggle.textContent = `英文：${show ? "開啟" : "隱藏"}`;
+      localStorage.setItem("drinkGameShowEnglish", show ? "1" : "0");
+    }
+    pinyinToggle.addEventListener("click", ()=>{
+      applyPinyinPreference(document.body.classList.contains("hide-pinyin"));
+    });
+    englishToggle.addEventListener("click", ()=>{
+      applyEnglishPreference(document.body.classList.contains("hide-en"));
+    });
+    hydrateStaticEnglish();
+    applyPinyinPreference(localStorage.getItem("drinkGameShowPinyin") !== "0");
+    applyEnglishPreference(localStorage.getItem("drinkGameShowEnglish") !== "0");
+
+    loadLevel(1, false);
+  </script>
+</body>
+</html>

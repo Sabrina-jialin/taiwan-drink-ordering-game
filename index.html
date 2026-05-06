@@ -1597,7 +1597,449 @@
       .status{grid-template-columns:1fr}
       .level-nav{grid-template-columns:1fr}
     }
-  </style>
+  
+
+    /* RWD 修正版：桌機、平板、手機都不跑版 */
+    html, body{
+      width:100%;
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    .page{
+      width:min(1440px, 100%) !important;
+      max-width:100% !important;
+      padding:clamp(12px, 2vw, 24px) !important;
+      overflow-x:hidden;
+    }
+
+    header{
+      grid-template-columns:minmax(210px,260px) minmax(0,1fr) !important;
+      gap:clamp(12px, 2vw, 22px) !important;
+    }
+
+    .brand,
+    .title,
+    .panel,
+    .menu,
+    .dialogue,
+    .side,
+    .prep-area,
+    .prep-bottom,
+    .guide-panel,
+    .guide-body,
+    .content{
+      min-width:0 !important;
+      max-width:100% !important;
+    }
+
+    main{
+      display:grid !important;
+      grid-template-columns:minmax(300px,.85fr) minmax(420px,1.25fr) minmax(310px,.85fr) !important;
+      gap:clamp(14px, 1.6vw, 22px) !important;
+      align-items:start !important;
+    }
+
+    .menu{grid-column:auto}
+    .dialogue{grid-column:auto}
+    .side{
+      display:grid;
+      gap:clamp(14px, 1.6vw, 20px);
+      min-width:0;
+    }
+
+    .prep-bottom{
+      grid-template-columns:minmax(280px,.9fr) minmax(360px,1.1fr) !important;
+    }
+
+    .menu-body{
+      min-width:0;
+    }
+
+    .menu-top,
+    .item{
+      grid-template-columns:52px minmax(0,1fr) minmax(52px,62px) minmax(52px,62px) !important;
+    }
+
+    .menu-top{
+      font-size:clamp(13px, 1.3vw, 15px);
+    }
+
+    .item{
+      min-width:0;
+    }
+
+    .item button{
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+
+    .price{
+      min-width:0;
+      text-align:center;
+      font-size:clamp(13px, 1.4vw, 16px);
+    }
+
+    .row,
+    .row.student,
+    .student-choice-row{
+      min-width:0;
+    }
+
+    .choice-group,
+    .choice-group.ice,
+    .choice-group.small-options{
+      margin-left:0 !important;
+      grid-template-columns:repeat(auto-fit, minmax(92px, 1fr)) !important;
+    }
+
+    .choice{
+      min-width:0;
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+
+    .summary-list li{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+
+    .summary-list .zhpy{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+
+    .confirm{
+      width:min(360px, 88%) !important;
+      font-size:clamp(18px, 2vw, 24px) !important;
+    }
+
+    .recorder{
+      width:min(560px, 100%) !important;
+      border-radius:28px !important;
+    }
+
+    .record-btn{
+      white-space:normal;
+      text-align:center;
+      justify-content:center;
+    }
+
+    .record-playback{
+      width:100%;
+    }
+
+    .record-audio{
+      max-width:100%;
+    }
+
+    .note{
+      display:block !important;
+      width:min(980px, 100%) !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      text-align:center !important;
+    }
+
+    .note + .note{
+      text-align:center !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+    }
+
+    @media (max-width:1280px){
+      main{
+        grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr) !important;
+      }
+      .side{
+        grid-column:1 / -1;
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        align-items:start;
+      }
+      .side .drink-card{
+        grid-column:auto;
+      }
+      .side .task{
+        grid-column:auto;
+      }
+    }
+
+    @media (max-width:1024px){
+      header{
+        grid-template-columns:1fr !important;
+        text-align:center;
+      }
+      .brand{
+        justify-content:center;
+      }
+      .title h1{
+        font-size:clamp(28px, 7vw, 44px) !important;
+      }
+      .title p{
+        font-size:clamp(15px, 3.4vw, 18px) !important;
+        letter-spacing:.08em !important;
+      }
+      main{
+        grid-template-columns:1fr !important;
+      }
+      .menu,
+      .dialogue,
+      .side{
+        grid-column:1 / -1 !important;
+      }
+      .side{
+        grid-template-columns:1fr !important;
+      }
+      .prep-bottom{
+        grid-template-columns:1fr !important;
+      }
+      .guide-body{
+        grid-template-columns:1fr !important;
+      }
+      .content{
+        grid-template-columns:minmax(160px,.8fr) minmax(0,1.2fr) !important;
+      }
+    }
+
+    @media (max-width:680px){
+      .page{
+        padding:10px !important;
+      }
+
+      .toolbar{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        justify-content:center;
+      }
+
+      .toolbar button{
+        flex:1 1 140px;
+        min-width:0;
+      }
+
+      .brand{
+        flex-direction:column;
+        text-align:center;
+        padding:16px 14px !important;
+      }
+
+      .logo-mark{
+        width:54px !important;
+        height:54px !important;
+      }
+
+      .panel-head{
+        font-size:clamp(19px, 5.2vw, 23px) !important;
+        padding:13px 14px !important;
+        gap:8px;
+      }
+
+      .prep-area{
+        gap:12px !important;
+      }
+
+      .phrase-card,
+      .scale-card,
+      .student-choice-card{
+        padding:12px !important;
+      }
+
+      .scale-line{
+        display:grid !important;
+        grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+        gap:8px !important;
+      }
+
+      .scale-chip{
+        min-width:0 !important;
+        width:100% !important;
+        padding:9px 8px !important;
+        font-size:14px !important;
+      }
+
+      .menu-body{
+        padding:10px 10px 14px !important;
+      }
+
+      .menu-top,
+      .item{
+        grid-template-columns:38px minmax(0,1fr) 46px 46px !important;
+        gap:4px !important;
+      }
+
+      .menu-top{
+        padding:8px 6px !important;
+      }
+
+      .category{
+        padding:8px !important;
+      }
+
+      .cat-title{
+        font-size:16px !important;
+      }
+
+      .item{
+        padding:8px 6px !important;
+        font-size:14px !important;
+      }
+
+      .item span:first-child{
+        font-size:20px;
+      }
+
+      .price{
+        font-size:13px !important;
+        padding:4px 0 !important;
+      }
+
+      .dialogue-body{
+        padding:12px !important;
+      }
+
+      .row,
+      .row.student,
+      .student-choice-row{
+        grid-template-columns:42px minmax(0,1fr) !important;
+        gap:8px !important;
+      }
+
+      .row.student,
+      .student-choice-row{
+        grid-template-columns:minmax(0,1fr) 42px !important;
+      }
+
+      .avatar{
+        width:42px !important;
+        height:42px !important;
+        font-size:24px !important;
+      }
+
+      .avatar::after{
+        font-size:10px !important;
+        bottom:-17px !important;
+      }
+
+      .bubble{
+        font-size:16px !important;
+        padding:12px 42px 12px 12px !important;
+        border-radius:18px !important;
+      }
+
+      .speak{
+        right:8px !important;
+        width:30px !important;
+        height:30px !important;
+      }
+
+      .choice-group,
+      .choice-group.ice,
+      .choice-group.small-options{
+        grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+        gap:8px !important;
+      }
+
+      .choice{
+        font-size:15px !important;
+        padding:10px 6px !important;
+      }
+
+      .recorder{
+        grid-template-columns:1fr !important;
+        padding:12px !important;
+      }
+
+      .wave{
+        display:none !important;
+      }
+
+      .record-btn{
+        width:100%;
+        font-size:19px !important;
+        padding:12px 16px !important;
+      }
+
+      .record-msg{
+        font-size:14px !important;
+        padding:0 10px;
+      }
+
+      .content{
+        grid-template-columns:1fr !important;
+        padding:16px 14px !important;
+      }
+
+      .cup{
+        height:150px !important;
+      }
+
+      .cup svg{
+        max-width:118px !important;
+      }
+
+      .summary-list li{
+        font-size:16px !important;
+        padding:10px 0 !important;
+      }
+
+      .summary-list span.icon{
+        font-size:21px !important;
+        width:24px !important;
+      }
+
+      .confirm{
+        width:92% !important;
+        padding:13px 16px !important;
+      }
+
+      .task-body{
+        grid-template-columns:1fr !important;
+        padding:16px !important;
+      }
+
+      .mascot{
+        display:none !important;
+      }
+
+      .toast{
+        width:calc(100% - 24px);
+        border-radius:18px !important;
+        bottom:14px !important;
+        padding:12px 14px !important;
+      }
+
+      .note{
+        font-size:12px !important;
+        line-height:1.65 !important;
+        padding:0 8px;
+      }
+    }
+
+    @media (max-width:390px){
+      .menu-top,
+      .item{
+        grid-template-columns:30px minmax(0,1fr) 40px 40px !important;
+      }
+
+      .choice-group,
+      .choice-group.ice,
+      .choice-group.small-options,
+      .scale-line{
+        grid-template-columns:1fr !important;
+      }
+
+      .title h1{
+        font-size:26px !important;
+      }
+
+      .panel-head{
+        font-size:18px !important;
+      }
+    }
+
+</style>
 </head>
 <body>
   <div class="fruit left">🍇🍊</div>

@@ -2747,8 +2747,8 @@
               <div class="choice-group small-options" id="memberGroup" data-group="member">
                 <button class="choice member zhpy" data-pinyin="wǒ yǒu zài jù" data-value="我有載具">我有載具</button>
                 <button class="choice member zhpy" data-pinyin="wǒ yǒu huì yuán" data-value="我有會員">我有會員</button>
-                <button class="choice member zhpy" data-pinyin="dōu bú yòng" data-value="都不用">都不用</button>
-                <button class="choice member zhpy" data-pinyin="dōu yào" data-value="都要">都要</button>
+                <button class="choice member zhpy" data-pinyin="dōu méi yǒu" data-value="都沒有">都沒有</button>
+                <button class="choice member zhpy" data-pinyin="dōu yǒu" data-value="都有">都有</button>
               </div>
             </div>
             <div class="avatar" data-label="學生">🧑🏻‍🎓</div>
@@ -2812,7 +2812,7 @@
               <li><span class="icon">❄️</span><span id="summaryIce" class="zhpy" data-pinyin="shǎo bīng">少冰</span></li>
               <li><span class="icon">🟤</span><span id="summaryTopping" class="zhpy" data-pinyin="jiā zhēn zhū">加珍珠</span></li>
               <li><span class="icon">🛍️</span><span id="summaryBag" class="zhpy" data-pinyin="bú yòng, xiè xie">不用，謝謝</span></li>
-              <li><span class="icon">📱</span><span id="summaryMember" class="zhpy" data-pinyin="dōu bú yòng">都不用</span></li>
+              <li><span class="icon">📱</span><span id="summaryMember" class="zhpy" data-pinyin="dōu méi yǒu">都沒有</span></li>
               <li><span class="icon">💰</span><span id="summaryCount" class="zhpy" data-pinyin="sì shí yuán">40 元</span></li>
             </ul>
           </div>
@@ -2893,8 +2893,8 @@
       "不用，謝謝": "bú yòng, xiè xie",
       "我有載具": "wǒ yǒu zài jù",
       "我有會員": "wǒ yǒu huì yuán",
-      "都不用": "dōu bú yòng",
-      "都要": "dōu yào",
+      "都沒有": "dōu méi yǒu",
+      "都有": "dōu yǒu",
       "按下錄音，說出你的完整答案。": "àn xià lù yīn, shuō chū nǐ de wán zhěng dá àn.",
       "請說：我要一杯……": "qǐng shuō: wǒ yào yì bēi...",
       "你說的是：": "nǐ shuō de shì:",
@@ -2951,8 +2951,8 @@
       "不用，謝謝": "No, thank you.",
       "我有載具": "I have a receipt carrier.",
       "我有會員": "I have a membership.",
-      "都不用": "Neither.",
-      "都要": "Both.",
+      "都沒有": "Neither.",
+      "都有": "Both available.",
       "按下錄音，說出你的完整答案。": "Press record and say your full answer.",
       "請說：我要一杯……": "Please say: I'd like one...",
       "此瀏覽器不支援語音辨識；仍可使用喇叭播放與點選練習。": "This browser does not support speech recognition. You can still use audio playback and click-to-practice.",
@@ -3061,7 +3061,7 @@
     const iceOptions = ["正常冰","少冰","微冰","去冰","熱"];
     const toppingOptions = ["加珍珠","加椰果","加寒天","X"];
     const bagOptions = ["好","不用，謝謝"];
-    const memberOptions = ["我有載具","我有會員","都不用","都要"];
+    const memberOptions = ["我有載具","我有會員","都沒有","都有"];
 
     function pick(list){
       return list[Math.floor(Math.random() * list.length)];
@@ -3221,7 +3221,7 @@
       ice: "少冰",
       topping: "加珍珠",
       bag: "不用，謝謝",
-      member: "都不用",
+      member: "都沒有",
       size: "大杯",
       priceM: 40,
       priceL: 40,
@@ -3237,7 +3237,7 @@
       targetIce: "少冰",
       targetTopping: "加珍珠",
       targetBag: "不用，謝謝",
-      targetMember: "都不用",
+      targetMember: "都沒有",
       dialogueStep: 0,
       dialogueIntroDone: false
     };

@@ -2519,6 +2519,24 @@
       }
     }
 
+
+
+    /* 標誌圖案改為插畫風飲料圖示 */
+    .logo-mark.logo-illustration{
+      font-size:38px !important;
+      background:linear-gradient(135deg,#fff2d9 0%,#ffd36e 48%,#ff9e52 100%) !important;
+      border:4px solid rgba(255,255,255,.8) !important;
+      box-shadow:0 8px 0 rgba(240,125,109,.18), 0 14px 24px rgba(163,94,50,.18) !important;
+    }
+    .logo-mark.logo-illustration::after{
+      content:"";
+      position:absolute;
+      inset:-8px;
+      border-radius:24px;
+      border:3px dashed rgba(103,183,122,.35);
+      pointer-events:none;
+    }
+
 </style>
 </head>
 <body>
@@ -2531,7 +2549,7 @@
 
     <header>
       <div class="brand" aria-label="教學模擬店標誌">
-        <div class="logo-mark">飲</div>
+        <div class="logo-mark logo-illustration" aria-hidden="true">🧋</div>
         <div class="brand-copy">
           <div class="brand-kicker">Mandarin Speaking Practice</div>
           <strong class="zhpy" data-pinyin="jiào xué mó nǐ diàn">教學模擬店</strong>
@@ -2594,7 +2612,7 @@
 
         <section class="phrases top-phrases" aria-label="常用點餐句型">
           <div class="phrase-title zhpy" data-pinyin="cháng yòng diǎn cān jù xíng">💬 常用點餐句型</div>
-          <div class="phrase-card p1"><span class="badge b1">1</span><span id="phrase1Text" class="mini-text zhpy" data-pinyin="wǒ yào yì bēi...">我要一杯……</span><button class="mini-speak" data-say="我要一杯紅茶。">🔊</button></div>
+          <div class="phrase-card p1"><span class="badge b1">1</span><span id="phrase1Text" class="mini-text zhpy" data-pinyin="wǒ yào yì bēi...">我要一杯……</span><button class="mini-speak" data-say="我要一杯">🔊</button></div>
           <div class="phrase-card p2"><span class="badge b2">2</span><span id="phrase2Text" class="mini-text zhpy" data-pinyin="tián dù yào..." data-en="Sweetness should be...">甜度要……</span><button class="mini-speak" data-say="甜度要">🔊</button></div>
           <div class="phrase-card p3"><span class="badge b3">3</span><span id="phrase3Text" class="mini-text zhpy" data-pinyin="bīng kuài yào..." data-en="Ice should be...">冰塊要……</span><button class="mini-speak" data-say="冰塊要">🔊</button></div>
           <div class="phrase-card p4"><span class="badge b4">4</span><span id="phrase4Text" class="mini-text zhpy" data-pinyin="wǒ yào mǎi yí ge dài zi.">我要買一個袋子。</span><button class="mini-speak" data-say="我要買一個袋子。">🔊</button></div>
@@ -2788,13 +2806,14 @@
               </svg>
             </div>
             <ul class="summary-list">
-              <li><span class="icon">🥤</span><span id="summaryCount" class="zhpy" data-pinyin="yì bēi, dà bēi, 40 yuán">1 杯，大杯，40 元</span></li>
+              <li><span class="icon">🥤</span><span id="summarySize" class="zhpy" data-pinyin="dà bēi">大杯</span></li>
               <li><span class="icon">🫖</span><span id="summaryDrink" class="zhpy" data-pinyin="hóng chá">紅茶</span></li>
               <li><span class="icon">🧊</span><span id="summarySugar" class="zhpy" data-pinyin="bàn táng">半糖</span></li>
               <li><span class="icon">❄️</span><span id="summaryIce" class="zhpy" data-pinyin="shǎo bīng">少冰</span></li>
               <li><span class="icon">🟤</span><span id="summaryTopping" class="zhpy" data-pinyin="jiā zhēn zhū">加珍珠</span></li>
               <li><span class="icon">🛍️</span><span id="summaryBag" class="zhpy" data-pinyin="bú yòng, xiè xie">不用，謝謝</span></li>
               <li><span class="icon">📱</span><span id="summaryMember" class="zhpy" data-pinyin="dōu bú yòng">都不用</span></li>
+              <li><span class="icon">💰</span><span id="summaryCount" class="zhpy" data-pinyin="sì shí yuán">40 元</span></li>
             </ul>
           </div>
           <button class="confirm" id="confirmBtn"><span class="zhpy" data-pinyin="què rèn diǎn cān">✅ 確認點餐</span></button>
@@ -3362,12 +3381,13 @@
       setZhPy("summaryMember", safe(state.member), safePy(state.member), safeEn(state.member));
       const sizeText = state.size || "—";
       const priceText = state.size ? `${state.price}` : "—";
-      setZhPy("summaryCount", summaryQuantityText(sizeText, priceText), summaryQuantityPinyin(sizeText, priceText), summaryQuantityEnglish(sizeText, priceText));
+      setZhPy("summarySize", sizeText === "瓶裝" ? "瓶裝" : (sizeText === "—" ? "—" : "大杯"), sizeText === "瓶裝" ? "píng zhuāng" : (sizeText === "—" ? "—" : "dà bēi"), sizeText === "瓶裝" ? "bottled drink" : (sizeText === "—" ? "—" : "large cup"));
+      setZhPy("summaryCount", state.size ? `${priceText} 元` : "—", state.size ? `${priceText} yuán` : "—", state.size ? `${priceText} NTD` : "—");
       updateTaskPanel();
       $("progressTitle").dataset.pinyin = `dì ${state.level} guān / gòng sān guān`;
       $("progressTitle").dataset.en = `Level ${state.level} / 3`;
       document.querySelector('[data-say-target="studentDrinkSentence"]').dataset.say = orderDrinkPhrase();
-      document.querySelector(".phrase-card.p1 .mini-speak").dataset.say = orderDrinkPhrase();
+      document.querySelector(".phrase-card.p1 .mini-speak").dataset.say = state.size === "瓶裝" ? "我要一瓶" : "我要一杯";
       setZhPy("phrase1Text", state.size === "瓶裝" ? `我要一瓶……` : `我要一杯……`, state.size === "瓶裝" ? `wǒ yào yì píng...` : `wǒ yào yì bēi...`, state.size === "瓶裝" ? `I'd like one bottle of...` : `I'd like one...`);
       setZhPy("phrase2Text", "甜度要……", "tián dù yào...", "Sweetness should be...");
       document.querySelector(".phrase-card.p2 .mini-speak").dataset.say = "甜度要";
@@ -3639,7 +3659,7 @@
       const finalIce = state.ice === "熱" ? "熱的" : state.ice;
       const items = [
         {text:"好的，跟您確認一下", elId:"summaryTaskBox"},
-        {text:state.size === "瓶裝" ? "一瓶" : "一杯大杯", elId:"summaryCount"},
+        {text:state.size === "瓶裝" ? "一瓶" : "一杯大杯", elId:"summarySize"},
         {text:state.drink, elId:"summaryDrink"},
         {text:state.sugar, elId:"summarySugar"},
         {text:finalIce, elId:"summaryIce"}
